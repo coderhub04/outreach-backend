@@ -30,4 +30,4 @@ jobs:
         echo "${{ secrets.ENV_FILE }}" > .env
 
     - name: Restart Backend Server
-      run: pm2 restart backend --update-env
+      run: ./script.sh

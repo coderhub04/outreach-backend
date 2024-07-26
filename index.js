@@ -8,6 +8,7 @@ const helpAndSupportRoutes = require("./routes/HelpAndSupportRoutes");
 const feedsRoutes = require("./routes/FeedsRoutes");
 const adminRoutes = require("./routes/AdminRoutes");
 const forumRoutes = require("./routes/ForumRoutes");
+const FeedCommentRoutes = require("./routes/FeedCommentRoutes");
 
 const mongoose = require("mongoose");
 
@@ -23,6 +24,7 @@ app.use("/support", helpAndSupportRoutes);
 app.use("/feed", feedsRoutes);
 app.use("/admin", adminRoutes);
 app.use("/forum", forumRoutes);
+app.use("/feed-comment", FeedCommentRoutes);
 
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .then(() => { console.log("Database is Connected") })

@@ -4,7 +4,6 @@ const sendResponse = require("../utils/response");
 
 const decryptFirebaseToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    console.log("Called")
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).send('Unauthorized: No token provided');
     }

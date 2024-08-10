@@ -104,6 +104,7 @@ const getCurrentProfileController = async (req, res) => {
     try {
         const { user_id } = sanitizeData(req.userToken);
 
+        // Fetch user data without `firebaseAuthId`
         const user = await UserModel.findOne({ firebaseAuthId: user_id }, { firebaseAuthId: 0 });
         if (!user) {
             return sendResponse(204, true, "No Data Found", null, res);
@@ -111,6 +112,7 @@ const getCurrentProfileController = async (req, res) => {
 
         const userId = user._id;
 
+        // Fetch feeds with comment count
         const feeds = await FeedsModel.aggregate([
             {
                 $match: { userId: new mongoose.Types.ObjectId(userId) }
@@ -136,6 +138,22 @@ const getCurrentProfileController = async (req, res) => {
                 }
             },
             {
+                $lookup: {
+                    from: 'feed_comments',
+                    let: { postId: '$_id' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
+                        { $count: "commentCount" }
+                    ],
+                    as: 'commentData'
+                }
+            },
+            {
+                $addFields: {
+                    commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
+                }
+            },
+            {
                 $project: {
                     content: 1,
                     likesCount: 1,
@@ -143,6 +161,7 @@ const getCurrentProfileController = async (req, res) => {
                     media: 1,
                     liked: 1,
                     public: 1,
+                    commentCount: 1,
                     "user.username": 1,
                     "user.imageUrl": 1,
                     "user.name": 1
@@ -153,8 +172,7 @@ const getCurrentProfileController = async (req, res) => {
             }
         ]);
 
-    
-
+        // Construct response
         const userResponse = {
             ...user.toObject(),
             feeds,

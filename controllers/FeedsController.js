@@ -1,3 +1,4 @@
+const FeedCommentModel = require("../models/FeedCommentModel");
 const FeedsModel = require("../models/FeedsModel");
 const UserModel = require("../models/UserModel");
 const sendResponse = require("../utils/response");
@@ -60,11 +61,31 @@ const updateFeedController = async (req, res) => {
         if (user.block) {
             return sendResponse(403, false, "Cannot Update Post", null, res);
         }
-
-        const updatedFeed = await FeedsModel.findByIdAndUpdate(feedId, updateData, { new: true });
+        const alreadyLiked = feed.likes.includes(user._id);
+        let updatedFeed;
+        updatedFeed = await FeedsModel.findByIdAndUpdate(feedId, updateData, { new: true });
         if (!updatedFeed) {
             return sendResponse(500, false, "Failed to Update Feed", null, res);
         }
+        updatedFeed = await FeedsModel.findById(feedId)
+            .populate({
+                path: "userId",
+                select: "name username imageUrl",
+                model: "users",
+                options: {
+                    virtuals: true,
+                    justOne: true,
+                    virtualName: 'user'
+                }
+            })
+            .lean();
+
+        updatedFeed.user = updatedFeed.userId;
+        delete updatedFeed.userId;
+        const commentsCount = await FeedCommentModel.find({ postID: feedId }).countDocuments();
+        updatedFeed.likesCount = updatedFeed.likes.length;
+        updatedFeed.commentCount = commentsCount;
+        updatedFeed.liked = !alreadyLiked;
 
         return sendResponse(200, true, "Feed Updated Successfully", updatedFeed, res);
     }
@@ -77,63 +98,93 @@ const getFeedController = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
         const userId = req.user._id;
-        const allFeeds = await FeedsModel.aggregate([
+
+        const aggregationPipeline = [
             {
-                $sort: { createdAt: -1 }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'user'
-                }
-            },
-            {
-                $unwind: '$user'
-            },
-            {
-                $addFields: {
-                    likesCount: { $size: "$likes" },
-                    liked: { $in: [userId, "$likes"] }
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { createdAt: -1 } },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'userId',
+                                foreignField: '_id',
+                                as: 'user'
+                            }
+                        },
+                        { $unwind: '$user' },
+                        {
+                            $addFields: {
+                                likesCount: { $size: "$likes" },
+                                liked: { $in: [userId, "$likes"] }
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'feed_comments',
+                                let: { postId: '$_id' },
+                                pipeline: [
+                                    { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
+                                    { $count: "commentCount" }
+                                ],
+                                as: 'commentData'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
+                            }
+                        },
+                        {
+                            $project: {
+                                content: 1,
+                                likesCount: 1,
+                                createdAt: 1,
+                                media: 1,
+                                public: 1,
+                                liked: 1,
+                                likes: 1,
+                                commentCount: 1,
+                                "user.username": 1,
+                                "user.imageUrl": 1,
+                                "user.name": 1
+                            }
+                        },
+                        { $skip: (page - 1) * limit },
+                        { $limit: Number(limit) }
+                    ]
                 }
             },
             {
                 $project: {
-                    content: 1,
-                    likesCount: 1,
-                    createdAt: 1,
-                    media: 1,
-                    public: 1,
-                    liked: 1,
-                    likes: 1,
-                    "user.username": 1,
-                    "user.imageUrl": 1,
-                    "user.name": 1
+                    data: 1,
+                    metadata: { $arrayElemAt: ["$metadata.total", 0] }
                 }
-            },
-            {
-                $skip: (page - 1) * limit
-            },
-            {
-                $limit: Number(limit)
             }
-        ]);
+        ];
 
-        const totalFeeds = await FeedsModel.countDocuments({ public: true });  // Update your count criteria if needed
+        const result = await FeedsModel.aggregate(aggregationPipeline).exec();
+
+        // Debugging output
+
+        const totalFeeds = result[0]?.metadata || 0;
         const totalPages = Math.ceil(totalFeeds / limit);
-        if (allFeeds.length === 0) {
+        const feeds = result[0]?.data || [];
+
+        if (feeds.length === 0) {
             return sendResponse(200, false, "No Feeds Found", {
-                feeds: allFeeds,
+                feeds,
                 totalFeeds,
                 totalPages,
                 currentPage: parseInt(page)
             }, res);
         }
 
-
         return sendResponse(200, true, "Feeds Fetched Successfully", {
-            feeds: allFeeds,
+            feeds,
             totalFeeds,
             totalPages,
             currentPage: parseInt(page)
@@ -237,8 +288,9 @@ const addLikeOnFeedController = async (req, res) => {
 
         updatedFeed.user = updatedFeed.userId;
         delete updatedFeed.userId;
-
+        const commentsCount = await FeedCommentModel.find({ postID: feedId }).countDocuments();
         updatedFeed.likesCount = updatedFeed.likes.length;
+        updatedFeed.commentCount = commentsCount;
         updatedFeed.liked = !alreadyLiked;
 
         return sendResponse(200, true, `Like ${alreadyLiked ? "Removed" : "Added"} Successfully`, updatedFeed, res);

@@ -36,6 +36,14 @@ const ForumSchema = new mongoose.Schema({
 		type: [mongoose.SchemaTypes.ObjectId],
 		ref: "users",
 		default: [],
+	},
+	deleted: {
+		type: Boolean,
+		default: false
+	},
+	disabled: {
+		type: Boolean,
+		default: false
 	}
 }, {
 	timestamps: true

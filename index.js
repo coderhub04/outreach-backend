@@ -10,6 +10,9 @@ const adminRoutes = require("./routes/AdminRoutes");
 const forumRoutes = require("./routes/ForumRoutes");
 const FeedCommentRoutes = require("./routes/FeedCommentRoutes");
 
+//ADMIN
+const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
+
 const mongoose = require("mongoose");
 
 const app = express();
@@ -25,6 +28,9 @@ app.use("/feed", feedsRoutes);
 app.use("/admin", adminRoutes);
 app.use("/forum", forumRoutes);
 app.use("/feed-comment", FeedCommentRoutes);
+
+// ADMIN
+app.use("/admin/forum", forumRoutesAdmin)
 
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .then(() => { console.log("Database is Connected") })

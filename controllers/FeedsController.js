@@ -245,7 +245,6 @@ const addLikeOnFeedController = async (req, res) => {
     try {
         const { user_id } = sanitizeData(req.userToken);
         const { feedId } = sanitizeData(req.params);
-        console.log(feedId);
 
         if (!mongoose.Types.ObjectId.isValid(feedId)) {
             return sendResponse(400, false, "Invalid Feed ID", null, res);

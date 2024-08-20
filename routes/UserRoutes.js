@@ -12,6 +12,7 @@ const {
     unFollowUserController,
     userLoginController,
     getCurrentProfileController,
+    userSearchUsernameAndName,
 } = require("../controllers/UserController");
 const userBlockStatus = require('../middlewares/userBlockStatus');
 
@@ -25,5 +26,6 @@ router.post("/follow/:followUserId", decryptFirebaseToken, followUserController)
 router.delete("/unfollow/:unFollowUserId", decryptFirebaseToken, unFollowUserController);
 router.post("/login", decryptFirebaseToken, userLoginController);
 router.get("/block-status", userBlockStatus);
+router.get("/search", userSearchUsernameAndName);
 
 module.exports = router;

@@ -176,8 +176,8 @@ const getCurrentProfileController = async (req, res) => {
         const userResponse = {
             ...user.toObject(),
             feeds,
-            followers: 0, 
-            following: 0, 
+            followers: 0,
+            following: 0,
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);
@@ -211,7 +211,7 @@ const blockUserController = async (req, res) => {
         }
 
         if (typeof blockStatus !== 'boolean') {
-            return sendResponse(400, false, "Invalid Block Status", null,res);
+            return sendResponse(400, false, "Invalid Block Status", null, res);
         }
 
         const blockUser = await UserModel.findByIdAndUpdate(userId, { block: blockStatus }, { new: true });
@@ -276,7 +276,7 @@ const unFollowUserController = async (req, res) => {
 
         const user = await UserModel.findOne({ firebaseAuthId: user_id });
         if (!user) {
-            return sendResponse(400, false, "Invalid Firebase Token", null,res);
+            return sendResponse(400, false, "Invalid Firebase Token", null, res);
         }
 
         if (user._id === unFollowUserId) {
@@ -324,6 +324,28 @@ const userLoginController = async (req, res) => {
     }
 }
 
+const userSearchUsernameAndName = async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) {
+            return sendResponse(400, false, "Search query is required", null, res);
+        }
+        const users = await UserModel.find({
+            $or: [
+                { username: { $regex: query, $options: "i" } },
+                { name: { $regex: query, $options: "i" } }
+            ]
+        });
+        if (!users || users.length === 0) {
+            return sendResponse(204, true, "No Data Found", null, res);
+        }
+        return sendResponse(200, true, "Data Fetched Successfully", users, res);
+    } catch (error) {
+        console.error("Error while searching users:", error.message);
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+}
+
 module.exports = {
     registerUserController,
     updateUserController,
@@ -334,4 +356,5 @@ module.exports = {
     unFollowUserController,
     userLoginController,
     getCurrentProfileController,
+    userSearchUsernameAndName
 };

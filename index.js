@@ -9,6 +9,7 @@ const feedsRoutes = require("./routes/FeedsRoutes");
 const adminRoutes = require("./routes/AdminRoutes");
 const forumRoutes = require("./routes/ForumRoutes");
 const FeedCommentRoutes = require("./routes/FeedCommentRoutes");
+const ForumFeedCommentRoutes = require("./routes/ForumFeedCommentRoutes");
 
 //ADMIN
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
@@ -28,6 +29,7 @@ app.use("/feed", feedsRoutes);
 app.use("/admin", adminRoutes);
 app.use("/forum", forumRoutes);
 app.use("/feed-comment", FeedCommentRoutes);
+app.use("/forum-feed-comment", ForumFeedCommentRoutes);
 
 // ADMIN
 app.use("/admin/forum", forumRoutesAdmin)

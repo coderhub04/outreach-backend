@@ -2,6 +2,9 @@ const { default: mongoose } = require('mongoose');
 const ForumFeedModel = require('../models/ForumFeedModel');
 const ForumModel = require('../models/ForumModel');
 const sendResponse = require('../utils/response');
+const UserModel = require('../models/UserModel');
+const ForumFeedCommentModel = require('../models/ForumFeedCommentModel');
+const sanitizeData = require('../utils/sanitizeData');
 
 const createForum = async (req, res) => {
     try {
@@ -172,11 +175,71 @@ const getForumPost = async (req, res) => {
     }
 };
 
+
+const addLikeOnForumFeedController = async (req, res) => {
+    try {
+        const { user_id } = sanitizeData(req.userToken);
+        const { feedId } = sanitizeData(req.params);
+
+        if (!mongoose.Types.ObjectId.isValid(feedId)) {
+            return sendResponse(400, false, "Invalid Feed ID", null, res);
+        }
+
+        const feed = await ForumFeedModel.findById(feedId);
+        if (!feed) {
+            return sendResponse(404, false, "Feed Not Found", null, res);
+        }
+
+        const user = await UserModel.findOne({ firebaseAuthId: user_id });
+        if (!user) {
+            return sendResponse(404, false, "User Not Found", null, res);
+        }
+
+        if (user.block) {
+            return sendResponse(403, false, "Cannot Like the Feed", null, res);
+        }
+
+        const alreadyLiked = feed.likes.includes(user._id);
+        let updatedFeed;
+
+        if (alreadyLiked) {
+            await ForumFeedModel.findByIdAndUpdate(feedId, { $pull: { likes: user._id } });
+        } else {
+            await ForumFeedModel.findByIdAndUpdate(feedId, { $push: { likes: user._id } });
+        }
+        updatedFeed = await ForumFeedModel.findById(feedId)
+            .populate({
+                path: "userId",
+                select: "name username imageUrl",
+                model: "users",
+                options: {
+                    virtuals: true,
+                    justOne: true,
+                    virtualName: 'user'
+                }
+            })
+            .lean();
+
+        updatedFeed.user = updatedFeed.userId;
+        delete updatedFeed.userId;
+        const commentsCount = await ForumFeedCommentModel.find({ postID: feedId }).countDocuments();
+        updatedFeed.likesCount = updatedFeed.likes.length;
+        updatedFeed.commentCount = commentsCount;
+        updatedFeed.liked = !alreadyLiked;
+
+        return sendResponse(200, true, `Like ${alreadyLiked ? "Removed" : "Added"} Successfully`, updatedFeed, res);
+    } catch (error) {
+        console.error("Error while adding/removing like on feed:", error);
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+};
+
 module.exports = {
     createForum,
     getForum,
     joinForum,
     leaveForum,
     createForumPost,
-    getForumPost
+    getForumPost,
+    addLikeOnForumFeedController
 }

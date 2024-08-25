@@ -17,9 +17,18 @@ const createForum = async (req, res) => {
     }
 }
 
-const getForum = async (req, res) => {
+const getForums = async (req, res) => {
     try {
         const forums = await ForumModel.find({ deleted: false, disabled: false }).populate('userId');
+        return sendResponse(200, true, 'Forum fetched', forums, res);
+    } catch (error) {
+        return sendResponse(500, false, error.message, null, res);
+    }
+}
+
+const getForum = async (req, res) => {
+    try {
+        const forums = await ForumModel.findOne({ _id: req.params._id, deleted: false, disabled: false }).populate('userId');
         return sendResponse(200, true, 'Forum fetched', forums, res);
     } catch (error) {
         return sendResponse(500, false, error.message, null, res);
@@ -237,6 +246,7 @@ const addLikeOnForumFeedController = async (req, res) => {
 module.exports = {
     createForum,
     getForum,
+    getForums,
     joinForum,
     leaveForum,
     createForumPost,

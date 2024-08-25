@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const decryptFirebaseToken = require("../middlewares/decryptFirebaseToken");
-const { createForum, getForum, joinForum, leaveForum, createForumPost, getForumPost, addLikeOnForumFeedController } = require('../controllers/ForumController');
+const { createForum, getForums, joinForum, leaveForum, createForumPost, getForumPost, addLikeOnForumFeedController } = require('../controllers/ForumController');
 
 router.post('/', decryptFirebaseToken, createForum);
-router.get('/', getForum);
+router.get('/', getForums);
+router.get('/:_id', getForum);
 router.patch('/join/:_id', decryptFirebaseToken, joinForum);
 router.patch('/leave/:_id', decryptFirebaseToken, leaveForum);
 router.get('/forum-post/:_id', decryptFirebaseToken, getForumPost);

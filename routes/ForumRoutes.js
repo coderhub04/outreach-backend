@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const decryptFirebaseToken = require("../middlewares/decryptFirebaseToken");
-const { createForum, getForums, joinForum, leaveForum, createForumPost, getForumPost, addLikeOnForumFeedController } = require('../controllers/ForumController');
+const { createForum, getForums, getForum, joinForum, leaveForum, createForumPost, getForumPost, addLikeOnForumFeedController } = require('../controllers/ForumController');
 
 router.post('/', decryptFirebaseToken, createForum);
 router.get('/', getForums);

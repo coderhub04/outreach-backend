@@ -78,7 +78,65 @@ const getUserProfileController = async (req, res) => {
             return sendResponse(204, true, "No Data Found", null, res);
         }
 
-        const feeds = await FeedsModel.find({ userId: id }).sort({ createdAt: -1 }).limit(3);
+        // Fetch feeds with comment count
+        const feeds = await FeedsModel.aggregate([
+            {
+                $match: { userId: new mongoose.Types.ObjectId(id) }
+            },
+            {
+                $sort: { createdAt: -1 }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $addFields: {
+                    likesCount: { $size: "$likes" },
+                    liked: { $in: [id, "$likes"] }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'feed_comments',
+                    let: { postId: '$_id' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
+                        { $count: "commentCount" }
+                    ],
+                    as: 'commentData'
+                }
+            },
+            {
+                $addFields: {
+                    commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
+                }
+            },
+            {
+                $project: {
+                    content: 1,
+                    likesCount: 1,
+                    createdAt: 1,
+                    media: 1,
+                    liked: 1,
+                    public: 1,
+                    commentCount: 1,
+                    "user.username": 1,
+                    "user.imageUrl": 1,
+                    "user.name": 1
+                }
+            },
+            {
+                $limit: 3
+            }
+        ]);
 
         // const [followersCount, followingCount] = await Promise.all([
         //     followingModel.countDocuments({ userId: id }),

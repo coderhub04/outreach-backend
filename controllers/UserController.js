@@ -353,36 +353,35 @@ const globalSearch = async (req, res) => {
         if (!query) {
             return sendResponse(400, false, "Search query is required", null, res);
         }
-        const users = await UserModel.find({
-            $match: {
-                $and: [
-                    {
-                        _id: { $ne: mongoose.Types.ObjectId(user) }
-                    },
-                    {
-                        $or: [
-                            { name: { $regex: regexQuery } },
-                            { username: { $regex: regexQuery } }
-                        ]
-                    }
-                ]
-            }
-        },
+        const users = await UserModel.aggregate([
             {
-                $project: {
-                    name: 1,        
-                    username: 1,    
-                    imageUrl: 1,   
-                    followers: 1,     
-                    _id: 1,
+                $match: {
+                    $and: [
+                        {
+                            _id: { $ne: mongoose.Types.ObjectId(user) }
+                        },
+                        {
+                            $or: [
+                                { name: { $regex: regexQuery } },
+                                { username: { $regex: regexQuery } }
+                            ]
+                        }
+                    ]
                 }
             },
             {
-                $limit: 10
-            });
-        if (!users || users.length === 0) {
-            return sendResponse(204, true, "No Data Found", null, res);
-        }
+                $project: {
+                    name: 1,
+                    username: 1,
+                    imageUrl: 1,
+                    followers: 1,
+                    _id: 1
+                }
+            },
+            {
+                $limit: 10           // Limit the results to 5
+            }
+        ]);
         return sendResponse(200, true, "Data Fetched Successfully", users, res);
     } catch (error) {
         console.error("Error while searching users:", error.message);

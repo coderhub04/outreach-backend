@@ -378,7 +378,7 @@ const globalSearch = async (req, res) => {
                 }
             },
             {
-                $limit: 1
+                $limit: 10
             });
         if (!users || users.length === 0) {
             return sendResponse(204, true, "No Data Found", null, res);

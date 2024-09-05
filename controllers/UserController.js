@@ -80,16 +80,16 @@ const getUserProfileController = async (req, res) => {
 
         const feeds = await FeedsModel.find({ userId: id }).sort({ createdAt: -1 }).limit(3);
 
-        const [followersCount, followingCount] = await Promise.all([
-            followingModel.countDocuments({ userId: id }),
-            followingModel.countDocuments({ follower: id })
-        ]);
+        // const [followersCount, followingCount] = await Promise.all([
+        //     followingModel.countDocuments({ userId: id }),
+        //     followingModel.countDocuments({ follower: id })
+        // ]);
 
         const userResponse = {
             ...user.toObject(),
             feeds,
-            followers: followersCount,
-            following: followingCount,
+            followers: 0,
+            following: 0,
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);

@@ -348,7 +348,7 @@ const userSearchUsernameAndName = async (req, res) => {
 
 const globalSearch = async (req, res) => {
     try {
-        const { query } = req.query;
+        const { query, user } = req.query;
         const regexQuery = new RegExp(query, "i");
         if (!query) {
             return sendResponse(400, false, "Search query is required", null, res);
@@ -357,7 +357,7 @@ const globalSearch = async (req, res) => {
             $match: {
                 $and: [
                     {
-                        _id: { $ne: mongoose.Types.ObjectId(req.user._id) }
+                        _id: { $ne: mongoose.Types.ObjectId(user) }
                     },
                     {
                         $or: [

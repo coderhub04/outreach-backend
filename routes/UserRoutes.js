@@ -28,6 +28,6 @@ router.delete("/unfollow/:unFollowUserId", decryptFirebaseToken, unFollowUserCon
 router.post("/login", decryptFirebaseToken, userLoginController);
 router.get("/block-status", userBlockStatus);
 router.get("/search", userSearchUsernameAndName);
-router.get("/global/search", decryptFirebaseToken, globalSearch)
+router.get("/global/search", globalSearch)
 
 module.exports = router;

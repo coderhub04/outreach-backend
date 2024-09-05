@@ -358,7 +358,7 @@ const globalSearch = async (req, res) => {
                 $match: {
                     $and: [
                         {
-                            _id: { $ne: mongoose.Types.ObjectId(user) }
+                            _id: { $ne: new mongoose.Types.ObjectId(user) }
                         },
                         {
                             $or: [

@@ -195,7 +195,6 @@ const getFeedController = async (req, res) => {
     }
 };
 
-
 const addCommentOnFeedController = async (req, res) => {
     try {
         const { user_id } = sanitizeData(req.userToken);

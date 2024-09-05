@@ -346,6 +346,50 @@ const userSearchUsernameAndName = async (req, res) => {
     }
 }
 
+const globalSearch = async (req, res) => {
+    try {
+        const { query } = req.query;
+        const regexQuery = new RegExp(query, "i");
+        if (!query) {
+            return sendResponse(400, false, "Search query is required", null, res);
+        }
+        const users = await UserModel.find({
+            $match: {
+                $and: [
+                    {
+                        _id: { $ne: mongoose.Types.ObjectId(req.user._id) }
+                    },
+                    {
+                        $or: [
+                            { name: { $regex: regexQuery } },
+                            { username: { $regex: regexQuery } }
+                        ]
+                    }
+                ]
+            }
+        },
+            {
+                $project: {
+                    name: 1,        
+                    username: 1,    
+                    imageUrl: 1,   
+                    followers: 1,     
+                    _id: 1,
+                }
+            },
+            {
+                $limit: 1
+            });
+        if (!users || users.length === 0) {
+            return sendResponse(204, true, "No Data Found", null, res);
+        }
+        return sendResponse(200, true, "Data Fetched Successfully", users, res);
+    } catch (error) {
+        console.error("Error while searching users:", error.message);
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+}
+
 module.exports = {
     registerUserController,
     updateUserController,
@@ -356,5 +400,6 @@ module.exports = {
     unFollowUserController,
     userLoginController,
     getCurrentProfileController,
-    userSearchUsernameAndName
+    userSearchUsernameAndName,
+    globalSearch
 };

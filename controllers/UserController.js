@@ -236,12 +236,17 @@ const getCurrentProfileController = async (req, res) => {
             }
         ]);
 
-        // Construct response
+        const followerCount = await FollowingModel.countDocuments({
+            follower: user._id
+        })
+        const followingCount = await FollowingModel.countDocuments({
+            userId: user._id
+        })
         const userResponse = {
             ...user.toObject(),
             feeds,
-            followers: 0,
-            following: 0,
+            followers: followerCount,
+            following: followingCount,
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);
@@ -425,7 +430,7 @@ const globalSearch = async (req, res) => {
                         {
                             $or: [
                                 { name: { $regex: regexQuery } },  // Case-insensitive regex search
-                                { username: { $regex: regexQuery} }
+                                { username: { $regex: regexQuery } }
                             ]
                         }
                     ]

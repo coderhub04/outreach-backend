@@ -6,32 +6,30 @@ const mongoose = require("mongoose");
 
 const followUser = async (req, res) => {
 	try {
-		const data = sanitizeData(req.body);
-		const { user_id } = sanitizeData(req.userToken);
-		const { id } = req.params
+		const { userId, id } = req.params
 
-		if (!user_id) {
+		if (!id) {
 			return sendResponse(400, false, "User ID Missing", null, "userId is required", res);
 		}
 
-		const user = await UserModel.findOne({ firebaseAuthId: user_id });
+		const user = await UserModel.findOne({ _id: id });
 
 		if (!user) {
 			return sendResponse(404, false, "User Not Found", null, "User with the provided ID does not exist", res);
 		}
 		const isFollowing = await FollowingModel.findOne({
 			userId: user._id,
-			follower: id
+			follower: userId
 		})
 		if (isFollowing) {
 			await FollowingModel.findOneAndDelete({
 				userId: user._id,
-				follower: id
+				follower: userId
 			})
 		} else {
 			const newFollowing = new FollowingModel({
 				userId: user._id,
-				follower: id
+				follower: userId
 			});
 			await newFollowing.save();
 		}

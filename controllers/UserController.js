@@ -73,7 +73,7 @@ const updateUserController = async (req, res) => {
 const getUserProfileController = async (req, res) => {
     try {
         const { id } = sanitizeData(req.params);
-
+        const { user_id } = sanitizeData(req.userToken);
         const user = await UserModel.findById(id, { token: 0 });
         if (!user) {
             return sendResponse(204, true, "No Data Found", null, res);
@@ -145,11 +145,16 @@ const getUserProfileController = async (req, res) => {
         const followingCount = await FollowingModel.countDocuments({
             userId: user._id
         })
+        const isFollowing = await FollowingModel.findOne({
+            userId: user_id,
+            follower: user._id
+        })
         const userResponse = {
             ...user.toObject(),
             feeds,
             followers: followerCount,
             following: followingCount,
+            isFollowing: isFollowing ? true : false
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);

@@ -19,7 +19,7 @@ const userBlockStatus = require('../middlewares/userBlockStatus');
 
 router.post("/register", decryptFirebaseToken, registerUserController);
 router.patch("/update", decryptFirebaseToken, updateUserController);
-router.get("/profile/:id", decryptFirebaseToken, getUserProfileController);
+router.get("/profile/:id/:userID", getUserProfileController);
 router.get("/current-user", decryptFirebaseToken, getCurrentProfileController);
 router.get("/get", getAllUserController);
 router.patch("/block/:userId", verifyAdmin, blockUserController);

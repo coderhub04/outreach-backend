@@ -72,8 +72,7 @@ const updateUserController = async (req, res) => {
 
 const getUserProfileController = async (req, res) => {
     try {
-        const { id } = sanitizeData(req.params);
-        const { user_id } = sanitizeData(req.userToken);
+        const { id, userID } = sanitizeData(req.params);
         const user = await UserModel.findById(id, { token: 0 });
         if (!user) {
             return sendResponse(204, true, "No Data Found", null, res);
@@ -146,7 +145,7 @@ const getUserProfileController = async (req, res) => {
             userId: user._id
         })
         const isFollowing = await FollowingModel.findOne({
-            userId: user_id,
+            userId: userID,
             follower: user._id
         })
         const userResponse = {
@@ -425,8 +424,8 @@ const globalSearch = async (req, res) => {
                         { _id: { $ne: new mongoose.Types.ObjectId(user) } },  // Exclude the current user
                         {
                             $or: [
-                                { name: { $regex: regexQuery, $options: 'i' } },  // Case-insensitive regex search
-                                { username: { $regex: regexQuery, $options: 'i' } }
+                                { name: { $regex: regexQuery } },  // Case-insensitive regex search
+                                { username: { $regex: regexQuery} }
                             ]
                         }
                     ]

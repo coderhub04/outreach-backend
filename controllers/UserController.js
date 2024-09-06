@@ -3,6 +3,7 @@ const UserModel = require("../models/UserModel");
 const FeedsModel = require("../models/FeedsModel");
 const sanitizeData = require("../utils/sanitizeData");
 const mongoose = require("mongoose");
+const FollowingModel = require("../models/FollowingModel");
 
 const registerUserController = async (req, res) => {
     try {
@@ -138,16 +139,17 @@ const getUserProfileController = async (req, res) => {
             }
         ]);
 
-        // const [followersCount, followingCount] = await Promise.all([
-        //     followingModel.countDocuments({ userId: id }),
-        //     followingModel.countDocuments({ follower: id })
-        // ]);
-
+        const followerCount = await FollowingModel.countDocuments({
+            follower: user._id
+        })
+        const followingCount = await FollowingModel.countDocuments({
+            userId: user._id
+        })
         const userResponse = {
             ...user.toObject(),
             feeds,
-            followers: 0,
-            following: 0,
+            followers: followerCount,
+            following: followingCount,
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);
@@ -415,16 +417,38 @@ const globalSearch = async (req, res) => {
             {
                 $match: {
                     $and: [
-                        {
-                            _id: { $ne: new mongoose.Types.ObjectId(user) }
-                        },
+                        { _id: { $ne: new mongoose.Types.ObjectId(user) } },  // Exclude the current user
                         {
                             $or: [
-                                { name: { $regex: regexQuery } },
-                                { username: { $regex: regexQuery } }
+                                { name: { $regex: regexQuery, $options: 'i' } },  // Case-insensitive regex search
+                                { username: { $regex: regexQuery, $options: 'i' } }
                             ]
                         }
                     ]
+                }
+            },
+            {
+                $lookup: {
+                    from: "followings",   // Collection name for the FollowingModel
+                    let: { userId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$userId", "$$userId"] },           // Match userId in FollowingModel
+                                        { $eq: ["$follower", new mongoose.Types.ObjectId(user)] }  // Match the current user's ID in follower field
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "isFollowing"
+                }
+            },
+            {
+                $addFields: {
+                    isFollowing: { $gt: [{ $size: "$isFollowing" }, 0] }  // Convert array to boolean
                 }
             },
             {
@@ -433,11 +457,12 @@ const globalSearch = async (req, res) => {
                     username: 1,
                     imageUrl: 1,
                     followers: 1,
+                    isFollowing: 1,  // Add isFollowing field to the result
                     _id: 1
                 }
             },
             {
-                $limit: 10           // Limit the results to 5
+                $limit: 10   // Limit the results to 10
             }
         ]);
         return sendResponse(200, true, "Data Fetched Successfully", users, res);

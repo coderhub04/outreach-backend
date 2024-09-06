@@ -11,8 +11,6 @@ const followingSchema = new mongoose.Schema({
     }
 });
 
-const followingModel = mongoose.model("following", followingSchema);
+const FollowingModel = mongoose.model("following", followingSchema);
 
-module.exports = {
-    followingModel,
-};
+module.exports = FollowingModel;

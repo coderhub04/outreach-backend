@@ -5,6 +5,6 @@ const {
     followUser, 
 } = require('../controllers/FollowingController');
 
-router.post("/follow/:id", decryptFirebaseToken, followUser);
+router.post("/:id", decryptFirebaseToken, followUser);
 
 module.exports = router;

@@ -11,6 +11,8 @@ const forumRoutes = require("./routes/ForumRoutes");
 const FeedCommentRoutes = require("./routes/FeedCommentRoutes");
 const ForumFeedCommentRoutes = require("./routes/ForumFeedCommentRoutes");
 const FollowingRoutes = require("./routes/FollowingRoutes");
+const ResourceCategoryRoutes = require("./routes/resource/CategoryRoutes");
+const ResourceFeedRoutes = require("./routes/resource/FeedsRoutes");
 
 //ADMIN
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
@@ -32,11 +34,13 @@ app.use("/forum", forumRoutes);
 app.use("/feed-comment", FeedCommentRoutes);
 app.use("/forum-feed-comment", ForumFeedCommentRoutes);
 app.use("/follow", FollowingRoutes);
+app.use("/resource", ResourceFeedRoutes);
+app.use("/resource-category", ResourceCategoryRoutes);
 
 // ADMIN
 app.use("/admin/forum", forumRoutesAdmin)
 
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
+mongoose.connect(process.env.MONGO_URL)
     .then(() => { console.log("Database is Connected") })
     .catch((err) => { console.log("Database is not Connected ", err) })
 

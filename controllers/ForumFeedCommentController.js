@@ -5,9 +5,8 @@ const { default: mongoose } = require('mongoose');
 
 const createComment = async (req, res) => {
     try {
-        const newComment = new ForumFeedCommentModel({ postID: req.params._id, author: req.user, ...req.body });
+        const newComment = new ForumFeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
-        console.log({ ...savedComment.toObject(), liked: false, likesCount: 0 });
         return sendResponse(200, true, "Comment posted successfully", { ...savedComment.toObject(), liked: false, likesCount: 0 }, res);
     }
     catch (error) {
@@ -20,7 +19,6 @@ const getPostComments = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
         const userId = req.user._id;
-        console.log("USERID", userId)
 
         const aggregationPipeline = [
             { $match: { postID: new mongoose.Types.ObjectId(req.params._id) } },
@@ -68,12 +66,6 @@ const getPostComments = async (req, res) => {
                 currentPage: parseInt(page)
             }, res);
         }
-        console.log({
-            comments: commentsAggregation,
-            totalComments,
-            totalPages,
-            currentPage: parseInt(page)
-        })
         return sendResponse(200, true, "Comments fetched successfully", {
             comments: commentsAggregation,
             totalComments,

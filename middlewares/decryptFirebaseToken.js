@@ -14,7 +14,6 @@ const decryptFirebaseToken = async (req, res, next) => {
             const decodedToken = await admin.auth().verifyIdToken(idToken);
 
             const user = await UserModel.findOne({ firebaseAuthId: decodedToken.user_id });
-            console.log(user)
 
             if (!user) {
                 req.userToken = decodedToken;

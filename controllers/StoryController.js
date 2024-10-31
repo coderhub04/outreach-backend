@@ -40,14 +40,13 @@ const getStories = async (req, res) => {
 	try {
 		const data = sanitizeData(req.body);
 		const { user_id } = sanitizeData(req.userToken);
-		let userID = new ObjectId(user_id)
-
-		if (!user_id) {
+		
+		if (!true) {
 			return sendResponse(400, false, "User ID Missing", null, res);
 		}
-
+		
 		const user = await UserModel.findOne({ firebaseAuthId: user_id });
-
+		
 		if (!user) {
 			return sendResponse(404, false, "User Not Found", null, res);
 		}
@@ -56,8 +55,8 @@ const getStories = async (req, res) => {
 			{
 				$match: {
 					$or: [
-						{ follower: userID },
-						{ userId: userID }
+						{ follower: user._id },
+						{ userId: user._id }
 					]
 				}
 			},
@@ -65,7 +64,7 @@ const getStories = async (req, res) => {
 				$project: {
 					relatedUserId: {
 						$cond: {
-							if: { $eq: ["$userId", userID] },
+							if: { $eq: ["$userId", user._id] },
 							then: "$follower",
 							else: "$userId"
 						}
@@ -89,8 +88,31 @@ const getStories = async (req, res) => {
 			userId: { $in: connectedUsers[0].userIds },
 			deleted: false
 		})
-			.sort({ timestamp: -1 })
-		return sendResponse(200, true, "Story Fetched Successfully", stories, res);
+			.sort({ timestamp: -1 }).populate({
+				path: "userId",
+				select: "name username imageUrl",
+				model: "users",
+				options: {
+					virtuals: true,
+					justOne: true,
+					virtualName: 'user'
+				}
+			});
+		const ownStory = await StoryModel.find({
+			userId: user._id,
+			deleted: false
+		})
+			.sort({ timestamp: -1 }).populate({
+				path: "userId",
+				select: "name username imageUrl",
+				model: "users",
+				options: {
+					virtuals: true,
+					justOne: true,
+					virtualName: 'user'
+				}
+			});
+		return sendResponse(200, true, "Story Fetched Successfully", { own: ownStory, user: stories, }, res);
 	}
 	catch (error) {
 		console.error("Error while posting story", error);

@@ -6,7 +6,7 @@ const { createStory, deleteStory, getStories } = require('../controllers/StoryCo
 
 
 router.post("/create", decryptFirebaseToken, createStory);
-router.get("/get", decryptFirebaseToken, getStories);
-router.delete("/:storyID", decryptFirebaseToken, deleteStory);
+router.get("/get", getStories);
+router.delete("/delete/:storyID", decryptFirebaseToken, deleteStory);
 
 module.exports = router;

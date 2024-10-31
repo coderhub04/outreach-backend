@@ -11,20 +11,19 @@ const StorySchema = new mongoose.Schema({
         default: "",
     },
     media: {
-        type: [Map],
-        default: [],
+        type: Map,
     },
     timestamp: {
         type: Number,
         required: true,
         default: Date.now()
     },
-	deleted: {
-		type: Boolean,
-		default: false
-	}
+    deleted: {
+        type: Boolean,
+        default: false
+    }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 const StoryModel = mongoose.model("stories", StorySchema);

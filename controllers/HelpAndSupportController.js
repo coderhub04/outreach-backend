@@ -10,13 +10,13 @@ const registerHelpRequestController = async (req, res) => {
         const { user_id } = sanitizeData(req.userToken);
 
         if (!user_id) {
-            return sendResponse(400, false, "User ID Missing", null, "userId is required", res);
+            return sendResponse(400, false, "User ID Missing", null, res);
         }
 
         const user = await UserModel.findOne({ firebaseAuthId: user_id });
 
         if (!user) {
-            return sendResponse(404, false, "User Not Found", null, "User with the provided ID does not exist", res);
+            return sendResponse(404, false, "User Not Found", null, res);
         }
 
         const registerData = {
@@ -26,11 +26,11 @@ const registerHelpRequestController = async (req, res) => {
 
         const registerRequest = new HelpAndSupportModel(registerData);
         await registerRequest.save();
-        return sendResponse(201, true, "Help & Support Request Registered Successfully", registerRequest, null, res);
+        return sendResponse(201, true, "Help & Support Request Registered Successfully", registerRequest, res);
     } 
     catch (error) {
         console.error("Error while registering help & support request:", error);
-        return sendResponse(500, false, "Internal Server Error", null, error.message, res);
+        return sendResponse(500, false, "Internal Server Error", error.message, res);
     }
 };
 

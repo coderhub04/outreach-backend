@@ -28,7 +28,15 @@ const ResourceFeedsSchema = new mongoose.Schema({
 		type: mongoose.SchemaTypes.ObjectId,
 		required: true,
 		ref: "resource_category"
-	}
+	},
+    approved: {
+        type: Boolean,
+        default: false
+    },
+    title: {
+        type: String,
+        required: true
+    }
 }, {
     timestamps: true 
 });

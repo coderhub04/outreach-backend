@@ -98,6 +98,7 @@ const updateFeedController = async (req, res) => {
 const getFeedController = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
+        console.log(req.query)
         const userId = req.user._id;
 
         const aggregationPipeline = [

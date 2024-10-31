@@ -13,6 +13,7 @@ const ForumFeedCommentRoutes = require("./routes/ForumFeedCommentRoutes");
 const FollowingRoutes = require("./routes/FollowingRoutes");
 const ResourceCategoryRoutes = require("./routes/resource/CategoryRoutes");
 const ResourceFeedRoutes = require("./routes/resource/FeedsRoutes");
+const StoryRoutes = require("./routes/StoryRoutes");
 
 //ADMIN
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
@@ -36,6 +37,7 @@ app.use("/forum-feed-comment", ForumFeedCommentRoutes);
 app.use("/follow", FollowingRoutes);
 app.use("/resource", ResourceFeedRoutes);
 app.use("/resource-category", ResourceCategoryRoutes);
+app.use("/story", StoryRoutes);
 
 // ADMIN
 app.use("/admin/forum", forumRoutesAdmin)

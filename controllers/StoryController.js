@@ -40,13 +40,13 @@ const getStories = async (req, res) => {
 	try {
 		const data = sanitizeData(req.body);
 		const { user_id } = sanitizeData(req.userToken);
-		
+
 		if (!true) {
 			return sendResponse(400, false, "User ID Missing", null, res);
 		}
-		
+
 		const user = await UserModel.findOne({ firebaseAuthId: user_id });
-		
+
 		if (!user) {
 			return sendResponse(404, false, "User Not Found", null, res);
 		}
@@ -84,20 +84,23 @@ const getStories = async (req, res) => {
 				}
 			}
 		])
-		const stories = await StoryModel.find({
-			userId: { $in: connectedUsers[0].userIds },
-			deleted: false
-		})
-			.sort({ timestamp: -1 }).populate({
-				path: "userId",
-				select: "name username imageUrl",
-				model: "users",
-				options: {
-					virtuals: true,
-					justOne: true,
-					virtualName: 'user'
-				}
-			});
+		let stories = [];
+		if (connectedUsers && connectedUsers[0] && connectedUsers[0].userIds) {
+			stories = await StoryModel.find({
+				userId: { $in: connectedUsers[0].userIds },
+				deleted: false
+			})
+				.sort({ timestamp: -1 }).populate({
+					path: "userId",
+					select: "name username imageUrl",
+					model: "users",
+					options: {
+						virtuals: true,
+						justOne: true,
+						virtualName: 'user'
+					}
+				});
+		}
 		const ownStory = await StoryModel.find({
 			userId: user._id,
 			deleted: false

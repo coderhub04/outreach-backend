@@ -150,6 +150,7 @@ const getFeedController = async (req, res) => {
                                 public: 1,
                                 liked: 1,
                                 likes: 1,
+                                title: 1,
                                 // commentCount: 1,
                                 "user.username": 1,
                                 "user.imageUrl": 1,

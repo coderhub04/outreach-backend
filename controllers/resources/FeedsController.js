@@ -1,3 +1,4 @@
+const FeedCommentModel = require("../../models/FeedCommentModel");
 const ResourceFeedsModel = require("../../models/ResourceFeed");
 const UserModel = require("../../models/UserModel");
 const sendResponse = require("../../utils/response");

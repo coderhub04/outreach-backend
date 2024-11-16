@@ -257,7 +257,7 @@ const addLikeOnFeedController = async (req, res) => {
             return sendResponse(400, false, "Invalid Feed ID", null, res);
         }
 
-        const feed = await FeedsModel.findById(feedId);
+        const feed = await ResourceFeedsModel.findById(feedId);
         if (!feed) {
             return sendResponse(404, false, "Feed Not Found", null, res);
         }

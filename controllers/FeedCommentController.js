@@ -5,7 +5,7 @@ const FeedCommentModel = require('../models/FeedCommentModel');
 const createComment = async (req, res) => {
     try {
 
-        const newComment = new FeedCommentModel({ postID: req.params._id, author: req.user, ...req.body });
+        const newComment = new FeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
         return sendResponse(200, true, "Comment posted successfully", savedComment, res);
     }

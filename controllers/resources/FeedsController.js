@@ -28,7 +28,7 @@ const createFeedController = async (req, res) => {
         await newFeed.save();
 
         const resource = await ResourceFeedsModel.findById(newFeed._id)
-        return sendResponse(201, true, "Feed Uploaded Successfully", {...resource.toObject(), liked: false, likesCount: 0, commentCount: 0, user: user}, res);
+        return sendResponse(201, true, "Feed Uploaded Successfully", { ...resource.toObject(), liked: false, likesCount: 0, commentCount: 0, user: user }, res);
     }
     catch (error) {
         console.error("Error while creating Feed: ", error);
@@ -103,6 +103,9 @@ const getFeedController = async (req, res) => {
         const userId = req.user._id;
 
         const aggregationPipeline = [
+            {
+                $match: { approved: true, block: false }
+            },
             {
                 $facet: {
                     metadata: [

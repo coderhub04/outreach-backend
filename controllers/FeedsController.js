@@ -101,6 +101,9 @@ const getFeedController = async (req, res) => {
 
         const aggregationPipeline = [
             {
+                $match: { block: false }
+            },
+            {
                 $facet: {
                     metadata: [
                         { $count: "total" }

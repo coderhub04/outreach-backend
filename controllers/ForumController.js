@@ -8,7 +8,7 @@ const sanitizeData = require('../utils/sanitizeData');
 
 const createForum = async (req, res) => {
     try {
-        const newForum = new ForumModel({ ...req.body, userId: req.user});
+        const newForum = new ForumModel({ ...req.body, userId: req.user });
         newForum.joined.push(req.user)
         const savedForum = await newForum.save()
         return sendResponse(200, true, 'Forum created', savedForum, res);
@@ -88,7 +88,8 @@ const getForumPost = async (req, res) => {
         const aggregationPipeline = [
             {
                 $match: {
-                    forum: new mongoose.Types.ObjectId(forumId)
+                    forum: new mongoose.Types.ObjectId(forumId),
+                    block: false
                 }
             },
             {

@@ -33,6 +33,10 @@ const ResourceFeedsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    block: {
+        type: Boolean,
+        default: false
+    },
     title: {
         type: String,
         required: true

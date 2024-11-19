@@ -14,6 +14,7 @@ const FollowingRoutes = require("./routes/FollowingRoutes");
 const ResourceCategoryRoutes = require("./routes/resource/CategoryRoutes");
 const ResourceFeedRoutes = require("./routes/resource/FeedsRoutes");
 const StoryRoutes = require("./routes/StoryRoutes");
+const ReportRoutes = require("./routes/ReportRoutes")
 
 //ADMIN
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
@@ -24,7 +25,7 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ limit:'500mb', extended: true, parameterLimit: 100000}));
+app.use(bodyParser.urlencoded({ limit: '500mb', extended: true, parameterLimit: 100000 }));
 
 
 app.use("/user", userRoutes);
@@ -38,7 +39,7 @@ app.use("/follow", FollowingRoutes);
 app.use("/resource", ResourceFeedRoutes);
 app.use("/resource-category", ResourceCategoryRoutes);
 app.use("/story", StoryRoutes);
-
+app.use("/report", ReportRoutes)
 // ADMIN
 app.use("/admin/forum", forumRoutesAdmin)
 

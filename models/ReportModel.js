@@ -21,6 +21,11 @@ const ReportSchema = new mongoose.Schema({
 	description: {
 		type: String,
 		required: false
+	},
+	type: {
+		type: String,
+		required: true,
+		enum: ["resource", "post", "forum"]
 	}
 });
 

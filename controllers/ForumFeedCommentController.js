@@ -1,12 +1,24 @@
 const sendResponse = require('../utils/response');
 const ForumFeedCommentModel = require('../models/ForumFeedCommentModel');
 const { default: mongoose } = require('mongoose');
+const NotificationModel = require('../models/NotificationModel');
+const UserModel = require('../models/UserModel');
 
 
 const createComment = async (req, res) => {
     try {
+        const fromUser = await UserModel.findById(req.user);
         const newComment = new ForumFeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
+        await NotificationModel.create({
+            from: fromUser._id,
+            to: feed.userId,
+            title: `@${fromUser.username} added a comment on your post`,
+            timestamp: Date.now(),
+            description: `@${fromUser.username} added a comment on your post`,
+            post: req.params._id,
+            type: "feed-comment"
+        })
         return sendResponse(200, true, "Comment posted successfully", { ...savedComment.toObject(), liked: false, likesCount: 0 }, res);
     }
     catch (error) {

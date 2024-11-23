@@ -1,4 +1,5 @@
 const FeedCommentModel = require("../../models/FeedCommentModel");
+const NotificationModel = require("../../models/NotificationModel");
 const ResourceFeedsModel = require("../../models/ResourceFeed");
 const UserModel = require("../../models/UserModel");
 const sendResponse = require("../../utils/response");
@@ -282,6 +283,15 @@ const addLikeOnFeedController = async (req, res) => {
             await ResourceFeedsModel.findByIdAndUpdate(feedId, { $pull: { likes: user._id } });
         } else {
             await ResourceFeedsModel.findByIdAndUpdate(feedId, { $push: { likes: user._id } });
+            await NotificationModel.create({
+                from: user._id,
+                to: feed.userId,
+                title: `@${user.username} liked your resource`,
+                timestamp: Date.now(),
+                description: `@${user.username} liked your resource`,
+                post: feed._id,
+                type: "resource-like"
+            })
         }
         updatedFeed = await ResourceFeedsModel.findById(feedId)
             .populate({

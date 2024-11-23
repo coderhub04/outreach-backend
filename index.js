@@ -15,6 +15,7 @@ const ResourceCategoryRoutes = require("./routes/resource/CategoryRoutes");
 const ResourceFeedRoutes = require("./routes/resource/FeedsRoutes");
 const StoryRoutes = require("./routes/StoryRoutes");
 const ReportRoutes = require("./routes/ReportRoutes")
+const NotificationRoutes = require("./routes/NotificationRoutes")
 
 //ADMIN
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
@@ -40,6 +41,7 @@ app.use("/resource", ResourceFeedRoutes);
 app.use("/resource-category", ResourceCategoryRoutes);
 app.use("/story", StoryRoutes);
 app.use("/report", ReportRoutes)
+app.use("/notification", NotificationRoutes)
 // ADMIN
 app.use("/admin/forum", forumRoutesAdmin)
 

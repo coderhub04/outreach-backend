@@ -1,5 +1,6 @@
 const FeedCommentModel = require("../models/FeedCommentModel");
 const FeedsModel = require("../models/FeedsModel");
+const NotificationModel = require("../models/NotificationModel");
 const UserModel = require("../models/UserModel");
 const sendResponse = require("../utils/response");
 const sanitizeData = require("../utils/sanitizeData");
@@ -273,6 +274,15 @@ const addLikeOnFeedController = async (req, res) => {
             await FeedsModel.findByIdAndUpdate(feedId, { $pull: { likes: user._id } });
         } else {
             await FeedsModel.findByIdAndUpdate(feedId, { $push: { likes: user._id } });
+            await NotificationModel.create({
+                from: user._id,
+                to: feed.userId,
+                title: `@${user.username} liked your post`,
+                timestamp: Date.now(),
+                description: `@${user.username} liked your post`,
+                post: feed._id,
+                type: "feed-like"
+            })
         }
         updatedFeed = await FeedsModel.findById(feedId)
             .populate({
@@ -293,6 +303,7 @@ const addLikeOnFeedController = async (req, res) => {
         updatedFeed.likesCount = updatedFeed.likes.length;
         updatedFeed.commentCount = commentsCount;
         updatedFeed.liked = !alreadyLiked;
+
 
         return sendResponse(200, true, `Like ${alreadyLiked ? "Removed" : "Added"} Successfully`, updatedFeed, res);
     } catch (error) {

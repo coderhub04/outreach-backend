@@ -33,6 +33,10 @@ const FeedsSchema = new mongoose.Schema({
         required: true,
         default: Date.now()
     },
+    deleted: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true 
 });

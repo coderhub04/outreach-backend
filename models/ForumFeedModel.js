@@ -31,15 +31,19 @@ const ForumFeedSchema = new mongoose.Schema({
     },
     block: {
         type: Boolean,
-        default: false,  
+        default: false,
     },
     timestamp: {
         type: Number,
         required: true,
         default: Date.now()
     },
+    deleted: {
+        type: Boolean,
+        default: false,
+    }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 const ForumFeedModel = mongoose.model("forum_feeds", ForumFeedSchema);

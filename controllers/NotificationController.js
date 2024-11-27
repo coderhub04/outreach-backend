@@ -1,5 +1,7 @@
 const sendResponse = require("../utils/response");
 const NotificationModel = require("../models/NotificationModel");
+const { getMessaging } = require("firebase-admin/messaging");
+const UserModel = require("../models/UserModel");
 
 
 const createNotification = async (req, res) => {
@@ -41,10 +43,37 @@ const getUserNotifications = async (req, res) => {
 	}
 };
 
+const sendNotificationUsingFCM = async (req, res) => {
+	try {
+		const user = await UserModel.findById(req.params._id);
+		if (!user) return sendResponse(404, false, "User not found", null, res);
+		if (user.fcmToken) {
+			getMessaging().send({
+				notification: {
+					title: req.body.title,
+					body: req.body.desc,
+					imageUrl: req.body.imageUrl,
+				},
+				token: user.fcmToken,
+				data: req.body.data
+			})
+				.then(async (response) => {
+					return sendResponse(200, true, "Notification sent!", null, res);
+				}).catch((err) => {
+					return sendResponse(500, false, err.message, null, res);
+				})
+		} else {
+			return sendResponse(404, false, "No token found", null, res);
+		}
+	} catch (error) {
+		return sendResponse(500, false, "Internal Server Error", null, res);
+	}
+}
 
 
 
 module.exports = {
 	createNotification,
-	getUserNotifications
+	getUserNotifications,
+	sendNotificationUsingFCM
 }

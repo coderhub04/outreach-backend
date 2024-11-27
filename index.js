@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 var bodyParser = require('body-parser')
+const { getMessaging } = require("firebase-admin/messaging");
 
 const userRoutes = require("./routes/UserRoutes");
 const helpAndSupportRoutes = require("./routes/HelpAndSupportRoutes");

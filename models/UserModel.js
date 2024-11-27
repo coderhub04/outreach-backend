@@ -51,6 +51,9 @@ const UserSchema = new mongoose.Schema({
     block: {
         type: Boolean,
         default: false,
+    },
+    fcmToken: {
+        type: String,
     }
 });
 

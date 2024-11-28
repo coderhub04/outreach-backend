@@ -49,10 +49,54 @@ const sendNotificationUsingFCM = async (req, res) => {
 		if (!user) return sendResponse(404, false, "User not found", null, res);
 		if (user.fcmToken) {
 			getMessaging().send({
+				android: {
+					priority: "high",
+					notification: {
+						sound: "alert",
+						channelId: "com.outreach.social.outreach_notification_channel_id",
+						defaultLightSettings: true,
+						tag: user._id
+					}
+				},
 				notification: {
 					title: req.body.title,
 					body: req.body.desc,
 					imageUrl: req.body.imageUrl,
+				},
+				token: user.fcmToken,
+				data: req.body.data
+			})
+				.then(async (response) => {
+					return sendResponse(200, true, "Notification sent!", null, res);
+				}).catch((err) => {
+					return sendResponse(500, false, err.message, null, res);
+				})
+		} else {
+			return sendResponse(404, false, "No token found", null, res);
+		}
+	} catch (error) {
+		return sendResponse(500, false, "Internal Server Error", null, res);
+	}
+}
+
+const sendMessageNotificationUsingFCM = async (req, res) => {
+	try {
+		const user = await UserModel.findById(req.params._id);
+		if (!user) return sendResponse(404, false, "User not found", null, res);
+		if (user.fcmToken) {
+			getMessaging().send({
+				android: {
+					priority: "high",
+					notification: {
+						sound: "alert",
+						channelId: "com.outreach.social.outreach_notification_channel_id",
+						defaultLightSettings: true,
+						tag: user._id
+					}
+				},
+				notification: {
+					title: `Message from ${user.name}`,
+					body: req.body.msg,
 				},
 				token: user.fcmToken,
 				data: req.body.data
@@ -75,5 +119,6 @@ const sendNotificationUsingFCM = async (req, res) => {
 module.exports = {
 	createNotification,
 	getUserNotifications,
-	sendNotificationUsingFCM
+	sendNotificationUsingFCM,
+	sendMessageNotificationUsingFCM
 }

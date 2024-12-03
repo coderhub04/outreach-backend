@@ -55,7 +55,6 @@ const sendNotificationUsingFCM = async (req, res) => {
 						sound: "alert",
 						channelId: "com.outreach.social.outreach_notification_channel_id",
 						defaultLightSettings: true,
-						tag: user._id
 					}
 				},
 				notification: {
@@ -91,7 +90,6 @@ const sendDeclineNotificationUsingFCM = async (req, res) => {
 						sound: "alert",
 						channelId: "com.outreach.social.outreach_notification_channel_id",
 						defaultLightSettings: true,
-						tag: user._id
 					}
 				},
 				notification: {
@@ -127,7 +125,6 @@ const sendMessageNotificationUsingFCM = async (req, res) => {
 						sound: "alert",
 						channelId: "com.outreach.social.outreach_notification_channel_id",
 						defaultLightSettings: true,
-						tag: user._id
 					}
 				},
 				notification: {

@@ -25,7 +25,7 @@ const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
 const mongoose = require("mongoose");
 
 const app = express();
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: ["*", 'http://localhost:5173'] }));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '500mb', extended: true, parameterLimit: 100000 }));

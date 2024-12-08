@@ -23,6 +23,7 @@ const AgoraRoutes = require("./routes/AgoraRoutes")
 const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
 const userRoutesAdmin = require("./routes/admin/UserRoutes");
 const storyRoutesAdmin = require("./routes/admin/StoryRoutes");
+const resourceRoutesAdmin = require("./routes/admin/ResourceRoutes");
 
 const mongoose = require("mongoose");
 
@@ -51,6 +52,7 @@ app.use("/agora", AgoraRoutes)
 app.use("/admin/forum", forumRoutesAdmin)
 app.use("/admin/user", userRoutesAdmin)
 app.use("/admin/story", storyRoutesAdmin)
+app.use("/admin/resource", resourceRoutesAdmin)
 
 mongoose.connect(process.env.MONGO_URL)
     .then(() => { console.log("Database is Connected") })

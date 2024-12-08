@@ -51,7 +51,7 @@ const getResourceById = async (req, res) => {
 const disableResources = async (req, res) => {
 	try {
 		const resource = await ResourceFeedsModel.findByIdAndUpdate(req.params._id);
-		const updatedStory = await ResourceFeedsModel.findByIdAndUpdate(req.params._id, {
+		const updateResource = await ResourceFeedsModel.findByIdAndUpdate(req.params._id, {
 			block: !resource.block
 		}, {
 			returnOriginal: false
@@ -65,7 +65,7 @@ const disableResources = async (req, res) => {
 				virtualName: 'user'
 			}
 		}).populate("category");
-		return sendResponse(200, true, 'Success', updatedStory, res);
+		return sendResponse(200, true, 'Success', updateResource, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);
 	}
@@ -74,7 +74,7 @@ const disableResources = async (req, res) => {
 const approveResources = async (req, res) => {
 	try {
 		const resource = await ResourceFeedsModel.findByIdAndUpdate(req.params._id);
-		const updatedStory = await ResourceFeedsModel.findByIdAndUpdate(req.params._id, {
+		const updateResource = await ResourceFeedsModel.findByIdAndUpdate(req.params._id, {
 			approved: !resource.approved
 		}, {
 			returnOriginal: false
@@ -88,7 +88,7 @@ const approveResources = async (req, res) => {
 				virtualName: 'user'
 			}
 		}).populate("category");
-		return sendResponse(200, true, 'Success', updatedStory, res);
+		return sendResponse(200, true, 'Success', updateResource, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);
 	}

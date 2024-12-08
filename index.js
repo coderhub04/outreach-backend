@@ -24,6 +24,7 @@ const forumRoutesAdmin = require("./routes/admin/ForumRoutes");
 const userRoutesAdmin = require("./routes/admin/UserRoutes");
 const storyRoutesAdmin = require("./routes/admin/StoryRoutes");
 const resourceRoutesAdmin = require("./routes/admin/ResourceRoutes");
+const postRoutesAdmin = require("./routes/admin/FeedRoutes");
 
 const mongoose = require("mongoose");
 
@@ -53,6 +54,7 @@ app.use("/admin/forum", forumRoutesAdmin)
 app.use("/admin/user", userRoutesAdmin)
 app.use("/admin/story", storyRoutesAdmin)
 app.use("/admin/resource", resourceRoutesAdmin)
+app.use("/admin/post", postRoutesAdmin)
 
 mongoose.connect(process.env.MONGO_URL)
     .then(() => { console.log("Database is Connected") })

@@ -1,6 +1,5 @@
+const ReportModel = require('../../models/ReportModel');
 const ResourceFeedsModel = require('../../models/ResourceFeed');
-const StoryModel = require('../../models/StoryModel');
-const UserModel = require('../../models/UserModel');
 const sendResponse = require('../../utils/response');
 
 const listResources = async (req, res) => {
@@ -33,7 +32,17 @@ const getResourceById = async (req, res) => {
 				virtualName: 'user'
 			}
 		}).populate("category")
-		return sendResponse(200, true, 'Resource fetched', resource, res);
+		const reports = await ReportModel.find({ type: "resource", post: resource._id }).populate({
+			path: "user",
+			select: "name username imageUrl _id email",
+			model: "users",
+			options: {
+				virtuals: true,
+				justOne: true,
+				virtualName: 'user'
+			}
+		})
+		return sendResponse(200, true, 'Resource fetched', { ...resource.toObject(), reports }, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);
 	}

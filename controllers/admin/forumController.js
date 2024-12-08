@@ -12,7 +12,7 @@ const getForum = async (req, res) => {
 
 const getForumById = async (req, res) => {
 	try {
-		const forum = await ForumModel.findOne({_id: req.params._id}).populate('userId', 'imageUrl username email name');
+		const forum = await ForumModel.findOne({ _id: req.params._id }).populate('userId', 'imageUrl username email name');
 		return sendResponse(200, true, 'Forum fetched', forum, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);

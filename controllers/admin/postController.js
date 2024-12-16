@@ -12,13 +12,19 @@ const listPosts = async (req, res) => {
 }
 
 const reportedPosts = async (req, res) => {
-	try {
-		const reportedPosts = await ReportModel.aggregate([
-            { $match: { type: "post",} },
+    try {
+        const reportedPosts = await ReportModel.aggregate([
+            { $match: { type: "post" } },
+            {
+                $group: {
+                    _id: "$post",
+                    reported_count: { $sum: 1 },
+                },
+            },
             {
                 $lookup: {
                     from: "feeds",
-                    localField: "post",
+                    localField: "_id",
                     foreignField: "_id",
                     as: "postDetails",
                 },
@@ -36,6 +42,7 @@ const reportedPosts = async (req, res) => {
             {
                 $project: {
                     _id: "$postDetails._id",
+                    reported_count: 1,
                     userId: {
                         _id: "$userDetails._id",
                         email: "$userDetails.email",
@@ -56,11 +63,12 @@ const reportedPosts = async (req, res) => {
             },
         ]);
 
-		return sendResponse(200, true, 'Posts fetched', reportedPosts, res);
-	} catch (error) {
-		return sendResponse(500, false, error.message, null, res);
-	}
-}
+        return sendResponse(200, true, "Posts fetched", reportedPosts, res);
+    } catch (error) {
+        return sendResponse(500, false, error.message, null, res);
+    }
+};
+
 
 const getPostById = async (req, res) => {
 	try {

@@ -42,7 +42,7 @@ const getResourceById = async (req, res) => {
 				virtualName: 'user'
 			}
 		})
-		return sendResponse(200, true, 'Resource fetched', { ...resource.toObject(), reports }, res);
+		return sendResponse(200, true, 'Resource fetched', { ...resource.toObject(), media: resource.media.toObject(), reports }, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);
 	}

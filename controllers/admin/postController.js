@@ -106,7 +106,7 @@ const disablePost = async (req, res) => {
 				justOne: true,
 				virtualName: 'user'
 			}
-		}).populate("category");
+		})
 		return sendResponse(200, true, 'Success', updatedPost, res);
 	} catch (error) {
 		return sendResponse(500, false, error.message, null, res);

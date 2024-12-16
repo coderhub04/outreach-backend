@@ -117,5 +117,6 @@ const disablePost = async (req, res) => {
 module.exports = {
 	listPosts,
 	getPostById,
-	disablePost
+	disablePost,
+	reportedPosts
 }

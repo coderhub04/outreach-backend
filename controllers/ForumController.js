@@ -144,6 +144,7 @@ const getForumPost = async (req, res) => {
                                 "user.username": 1,
                                 "user.imageUrl": 1,
                                 "user.name": 1,
+                                "user._id": 1,
                                 "forum": 1
                             }
                         },

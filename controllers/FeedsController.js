@@ -154,7 +154,8 @@ const getFeedController = async (req, res) => {
                                 commentCount: 1,
                                 "user.username": 1,
                                 "user.imageUrl": 1,
-                                "user.name": 1
+                                "user.name": 1,
+                                "user._id": 1,
                             }
                         },
                         { $skip: (page - 1) * limit },

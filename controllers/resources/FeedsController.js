@@ -129,22 +129,22 @@ const getFeedController = async (req, res) => {
                                 liked: { $in: [userId, "$likes"] }
                             }
                         },
-                        // {
-                        //     $lookup: {
-                        //         from: 'feed_comments',
-                        //         let: { postId: '$_id' },
-                        //         pipeline: [
-                        //             { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
-                        //             { $count: "commentCount" }
-                        //         ],
-                        //         as: 'commentData'
-                        //     }
-                        // },
-                        // {
-                        //     $addFields: {
-                        //         commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
-                        //     }
-                        // },
+                        {
+                            $lookup: {
+                                from: 'feed_comments',
+                                let: { postId: '$_id' },
+                                pipeline: [
+                                    { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
+                                    { $count: "commentCount" }
+                                ],
+                                as: 'commentData'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
+                            }
+                        },
                         {
                             $project: {
                                 category: 1,
@@ -156,10 +156,11 @@ const getFeedController = async (req, res) => {
                                 liked: 1,
                                 likes: 1,
                                 title: 1,
-                                // commentCount: 1,
+                                commentCount: 1,
                                 "user.username": 1,
                                 "user.imageUrl": 1,
-                                "user.name": 1
+                                "user.name": 1,
+                                "user._id": 1,
                             }
                         },
                         { $skip: (page - 1) * limit },

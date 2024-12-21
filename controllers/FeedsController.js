@@ -203,12 +203,13 @@ const getFeedController = async (req, res) => {
 const getUserFeed = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
-        const userId = req.user._id;
+        const userId = req.params.userID
 
         const aggregationPipeline = [
             {
                 $match: {
-                    block: false, userId: new mongoose.ObjectId(userId)
+                    block: false,
+                    userId: new mongoose.Types.ObjectId(userId)
                 }
             },
             {

@@ -16,7 +16,7 @@ const {
 router.post("/create", decryptFirebaseToken, createFeedController);
 router.patch("/update/:feedId", decryptFirebaseToken, updateFeedController);
 router.get("/get", decryptFirebaseToken, getFeedController);
-router.get("/get/:userID", decryptFirebaseToken, getUserFeed);
+router.get("/get/:userID", getUserFeed);
 router.patch("/comment", decryptFirebaseToken, addCommentOnFeedController);
 router.patch("/like/:feedId", decryptFirebaseToken, addLikeOnFeedController);
 router.delete("/delete/:feedId", decryptFirebaseToken, deleteFeedController);

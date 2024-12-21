@@ -200,6 +200,113 @@ const getFeedController = async (req, res) => {
     }
 };
 
+const getUserFeed = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const userId = req.user._id;
+
+        const aggregationPipeline = [
+            {
+                $match: {
+                    block: false, userId: new mongoose.ObjectId(userId)
+                }
+            },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $sort: { createdAt: -1 } },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'userId',
+                                foreignField: '_id',
+                                as: 'user'
+                            }
+                        },
+                        { $unwind: '$user' },
+                        {
+                            $addFields: {
+                                likesCount: { $size: "$likes" },
+                                liked: { $in: [userId, "$likes"] }
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'feed_comments',
+                                let: { postId: '$_id' },
+                                pipeline: [
+                                    { $match: { $expr: { $eq: ["$postID", "$$postId"] } } },
+                                    { $count: "commentCount" }
+                                ],
+                                as: 'commentData'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                commentCount: { $ifNull: [{ $arrayElemAt: ["$commentData.commentCount", 0] }, 0] }
+                            }
+                        },
+                        {
+                            $project: {
+                                content: 1,
+                                likesCount: 1,
+                                createdAt: 1,
+                                media: 1,
+                                public: 1,
+                                liked: 1,
+                                likes: 1,
+                                commentCount: 1,
+                                "user.username": 1,
+                                "user.imageUrl": 1,
+                                "user.name": 1,
+                                "user._id": 1,
+                            }
+                        },
+                        { $skip: (page - 1) * limit },
+                        { $limit: Number(limit) }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    data: 1,
+                    metadata: { $arrayElemAt: ["$metadata.total", 0] }
+                }
+            }
+        ];
+
+        const result = await FeedsModel.aggregate(aggregationPipeline).exec();
+
+        // Debugging output
+
+        const totalFeeds = result[0]?.metadata || 0;
+        const totalPages = Math.ceil(totalFeeds / limit);
+        const feeds = result[0]?.data || [];
+
+        if (feeds.length === 0) {
+            return sendResponse(200, false, "No Feeds Found", {
+                feeds,
+                totalFeeds,
+                totalPages,
+                currentPage: parseInt(page)
+            }, res);
+        }
+
+        return sendResponse(200, true, "Feeds Fetched Successfully", {
+            feeds,
+            totalFeeds,
+            totalPages,
+            currentPage: parseInt(page)
+        }, res);
+    } catch (error) {
+        console.error("Error while getting feeds: ", error.message);
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+};
+
 const addCommentOnFeedController = async (req, res) => {
     try {
         const { user_id } = sanitizeData(req.userToken);
@@ -383,4 +490,5 @@ module.exports = {
     addLikeOnFeedController,
     deleteFeedController,
     blockFeedController,
+    getUserFeed
 };

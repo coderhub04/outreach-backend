@@ -73,9 +73,8 @@ const createForumPost = async (req, res) => {
     try {
         const forumPost = new ForumFeedModel({ ...req.body, userId: req.user._id, forum: req.params._id });
         const savedForumPost = await forumPost.save();
-        const savedPost = await ForumFeedModel.findById(savedForumPost._id)
         const user = await UserModel.findById(req.user._id)
-        return sendResponse(200, true, 'Forum Post created!', { ...savedPost.toObject(), user: user.toObject() }, res);
+        return sendResponse(200, true, 'Forum Post created!', { ...savedForumPost.toObject(), user: user.toObject() }, res);
     } catch (error) {
         console.log(error)
         return sendResponse(500, false, error.message, null, res);

@@ -102,7 +102,7 @@ const getFeedController = async (req, res) => {
 
         const aggregationPipeline = [
             {
-                $match: { block: false }
+                $match: { block: false, deleted: false }
             },
             {
                 $facet: {
@@ -209,7 +209,8 @@ const getUserFeed = async (req, res) => {
             {
                 $match: {
                     block: false,
-                    userId: new mongoose.Types.ObjectId(userId)
+                    userId: new mongoose.Types.ObjectId(userId),
+                    deleted: false
                 }
             },
             {
@@ -444,7 +445,9 @@ const deleteFeedController = async (req, res) => {
             return sendResponse(403, false, "Access Denied", null, res);
         }
 
-        const deletedFeed = await FeedsModel.findByIdAndDelete(feedId);
+        const deletedFeed = await FeedsModel.findByIdAndUpdate(feedId, {
+            deleted: true
+        });
         if (!deletedFeed) {
             return sendResponse(500, false, "Failed to Delete Feed", null, "An error occurred while deleting the feed", res);
         }

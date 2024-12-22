@@ -449,14 +449,14 @@ const deleteFeedController = async (req, res) => {
             deleted: true
         });
         if (!deletedFeed) {
-            return sendResponse(500, false, "Failed to Delete Feed", null, "An error occurred while deleting the feed", res);
+            return sendResponse(500, false, "Failed to Delete Feed", null, res);
         }
 
-        return sendResponse(200, true, "Feed Deleted Successfully", null, null, res);
+        return sendResponse(200, true, "Feed Deleted Successfully", null, res);
     }
     catch (error) {
         console.error("Error while deleting feed:", error);
-        return sendResponse(500, false, "Internal Server Error", null, error.message, res);
+        return sendResponse(500, false, "Internal Server Error", null, res);
     }
 }
 

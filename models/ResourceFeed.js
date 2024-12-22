@@ -24,11 +24,11 @@ const ResourceFeedsSchema = new mongoose.Schema({
         required: true,
         default: Date.now()
     },
-	category: {
-		type: mongoose.SchemaTypes.ObjectId,
-		required: true,
-		ref: "resource_category"
-	},
+    category: {
+        type: mongoose.SchemaTypes.ObjectId,
+        required: true,
+        ref: "resource_category"
+    },
     approved: {
         type: Boolean,
         default: false
@@ -40,9 +40,13 @@ const ResourceFeedsSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true
+    },
+    deleted: {
+        type: Boolean,
+        default: false
     }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 const ResourceFeedsModel = mongoose.model("resource_feeds", ResourceFeedsSchema);

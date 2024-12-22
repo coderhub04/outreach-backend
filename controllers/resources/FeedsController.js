@@ -105,7 +105,7 @@ const getFeedController = async (req, res) => {
 
         const aggregationPipeline = [
             {
-                $match: { approved: true, block: false }
+                $match: { approved: true, block: false, deleted: false }
             },
             {
                 $facet: {
@@ -321,41 +321,43 @@ const addLikeOnFeedController = async (req, res) => {
     }
 };
 
-// const deleteFeedController = async (req, res) => {
-//     try {
-//         const { feedId } = sanitizeData(req.params);
-//         const { user_id } = sanitizeData(req.userToken);
+const deleteFeedController = async (req, res) => {
+    try {
+        const { feedId } = sanitizeData(req.params);
+        const { user_id } = sanitizeData(req.userToken);
 
-//         if (!mongoose.Types.ObjectId.isValid(feedId)) {
-//             return sendResponse(400, false, "Invalid Feed ID", null, res);
-//         }
+        if (!mongoose.Types.ObjectId.isValid(feedId)) {
+            return sendResponse(400, false, "Invalid Feed ID", null, res);
+        }
 
-//         const feed = await FeedsModel.findById(feedId);
-//         if (!feed) {
-//             return sendResponse(404, false, "Feed Not Found", null, res);
-//         }
+        const feed = await FeedsModel.findById(feedId);
+        if (!feed) {
+            return sendResponse(404, false, "Feed Not Found", null, res);
+        }
 
-//         const user = await UserModel.findOne({ firebaseAuthId: user_id });
-//         if (!user) {
-//             return sendResponse(404, false, "User Not Found", null, res);
-//         }
+        const user = await UserModel.findOne({ firebaseAuthId: user_id });
+        if (!user) {
+            return sendResponse(404, false, "User Not Found", null, res);
+        }
 
-//         if (feed.userId.toString() !== user._id.toString()) {
-//             return sendResponse(403, false, "Access Denied", null, res);
-//         }
+        if (feed.userId.toString() !== user._id.toString()) {
+            return sendResponse(403, false, "Access Denied", null, res);
+        }
 
-//         const deletedFeed = await FeedsModel.findByIdAndDelete(feedId);
-//         if (!deletedFeed) {
-//             return sendResponse(500, false, "Failed to Delete Feed", null, "An error occurred while deleting the feed", res);
-//         }
+        const deletedFeed = await ResourceFeedsModel.findByIdAndUpdate(feedId, {
+            deleted: true
+        });
+        if (!deletedFeed) {
+            return sendResponse(500, false, "Failed to Delete Feed", null, res);
+        }
 
-//         return sendResponse(200, true, "Feed Deleted Successfully", null, null, res);
-//     }
-//     catch (error) {
-//         console.error("Error while deleting feed:", error);
-//         return sendResponse(500, false, "Internal Server Error", null, error.message, res);
-//     }
-// }
+        return sendResponse(200, true, "Feed Deleted Successfully", null, res);
+    }
+    catch (error) {
+        console.error("Error while deleting feed:", error);
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+}
 
 // const blockFeedController = async (req, res) => {
 //     try {
@@ -387,5 +389,6 @@ module.exports = {
     createFeedController,
     updateFeedController,
     getFeedController,
+    deleteFeedController,
     addLikeOnFeedController
 };

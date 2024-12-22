@@ -80,6 +80,21 @@ const createForumPost = async (req, res) => {
         return sendResponse(500, false, error.message, null, res);
     }
 }
+const deleteForumPost = async (req, res) => {
+    try {
+        const deletedPost = await ForumFeedModel.findByIdAndUpdate(req.params._id, {
+            deleted: true
+        })
+        if (deletedPost) {
+            return sendResponse(200, true, 'Forum Post deleted!', deletedPost, res);
+        } else {
+            return sendResponse(400, true, 'Something went wrong', null, res);
+        }
+    } catch (error) {
+        console.log(error)
+        return sendResponse(500, false, error.message, null, res);
+    }
+}
 
 const getForumPost = async (req, res) => {
     try {
@@ -90,7 +105,8 @@ const getForumPost = async (req, res) => {
             {
                 $match: {
                     forum: new mongoose.Types.ObjectId(forumId),
-                    block: false
+                    block: false,
+                    deleted: false
                 }
             },
             {
@@ -260,6 +276,7 @@ module.exports = {
     createForum,
     getForum,
     getForums,
+    deleteForumPost,
     joinForum,
     leaveForum,
     createForumPost,

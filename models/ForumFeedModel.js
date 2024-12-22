@@ -4,7 +4,8 @@ const ForumFeedSchema = new mongoose.Schema({
     userId: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: "users",
-        required: true
+        required: true,
+        alias: 'user'
     },
     forum: {
         type: mongoose.SchemaTypes.ObjectId,

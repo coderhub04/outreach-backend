@@ -30,8 +30,8 @@ const createComment = async (req, res) => {
                 post: req.params._id,
                 type: "feed-comment"
             })
+            await notification.save();
         }
-        await notification.save();
         return sendResponse(200, true, "Comment posted successfully", savedComment, res);
     }
     catch (error) {

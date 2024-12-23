@@ -10,7 +10,7 @@ const createComment = async (req, res) => {
         const fromUser = await UserModel.findById(req.user);
         const newComment = new FeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
-        await NotificationModel.create({
+        const notification = new NotificationModel({
             from: fromUser._id,
             to: feed.userId,
             title: `@${fromUser.username} added a comment on your post`,
@@ -19,6 +19,7 @@ const createComment = async (req, res) => {
             post: req.params._id,
             type: "feed-comment"
         })
+        await notification.save();
         return sendResponse(200, true, "Comment posted successfully", savedComment, res);
     }
     catch (error) {

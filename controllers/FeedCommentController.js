@@ -2,23 +2,35 @@ const sendResponse = require('../utils/response');
 const FeedCommentModel = require('../models/FeedCommentModel');
 const NotificationModel = require('../models/NotificationModel');
 const UserModel = require('../models/UserModel');
+const FeedsModel = require('../models/FeedsModel');
+const ResourceFeedsModel = require('../models/ResourceFeed');
 
 
 const createComment = async (req, res) => {
     try {
 
         const fromUser = await UserModel.findById(req.user);
+        let feed;
+        const tempFeed = await FeedsModel.findById(req.params._id);
+        if (tempFeed) {
+            feed = tempFeed
+        } else {
+            feed = await ResourceFeedsModel.findById(req.params._id);
+        }
+
         const newComment = new FeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
-        const notification = new NotificationModel({
-            from: fromUser._id,
-            to: feed.userId,
-            title: `@${fromUser.username} added a comment on your post`,
-            timestamp: Date.now(),
-            description: `@${fromUser.username} added a comment on your post`,
-            post: req.params._id,
-            type: "feed-comment"
-        })
+        if (feed) {
+            const notification = new NotificationModel({
+                from: fromUser._id,
+                to: feed.userId,
+                title: `@${fromUser.username} added a comment on your post`,
+                timestamp: Date.now(),
+                description: `@${fromUser.username} added a comment on your post`,
+                post: req.params._id,
+                type: "feed-comment"
+            })
+        }
         await notification.save();
         return sendResponse(200, true, "Comment posted successfully", savedComment, res);
     }

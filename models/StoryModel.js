@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const MediaSchema = require("./MediaModel");
 
 const StorySchema = new mongoose.Schema({
     userId: {
@@ -11,7 +12,7 @@ const StorySchema = new mongoose.Schema({
         default: "",
     },
     media: {
-        type: Map,
+        type: MediaSchema,
     },
     timestamp: {
         type: Number,

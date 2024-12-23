@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const MediaSchema = require("./MediaModel");
 
 const FeedsSchema = new mongoose.Schema({
     userId: {
@@ -16,7 +17,7 @@ const FeedsSchema = new mongoose.Schema({
         default: "",
     },
     media: {
-        type: [Map],
+        type: [MediaSchema],
         default: [],
     },
     likes: {
@@ -26,7 +27,7 @@ const FeedsSchema = new mongoose.Schema({
     },
     block: {
         type: Boolean,
-        default: false,  
+        default: false,
     },
     timestamp: {
         type: Number,
@@ -38,7 +39,7 @@ const FeedsSchema = new mongoose.Schema({
         default: false
     }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 const FeedsModel = mongoose.model("feeds", FeedsSchema);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const MediaSchema = require("./MediaModel");
 
 const ForumFeedSchema = new mongoose.Schema({
     userId: {
@@ -21,7 +22,7 @@ const ForumFeedSchema = new mongoose.Schema({
         default: "",
     },
     media: {
-        type: [Map],
+        type: [MediaSchema],
         default: [],
     },
     likes: {

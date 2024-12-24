@@ -235,15 +235,17 @@ const addLikeOnForumFeedController = async (req, res) => {
             await ForumFeedModel.findByIdAndUpdate(feedId, { $pull: { likes: user._id } });
         } else {
             await ForumFeedModel.findByIdAndUpdate(feedId, { $push: { likes: user._id } });
-            await NotificationModel.create({
-                from: user._id,
-                to: feed.userId,
-                title: `@${user.username} liked your forum post`,
-                timestamp: Date.now(),
-                description: `@${user.username} liked your forum post`,
-                post: feed._id,
-                type: "forum-post-like"
-            })
+            if (feed.userId != user._id) {
+                await NotificationModel.create({
+                    from: user._id,
+                    to: feed.userId,
+                    title: `@${user.username} liked your forum post`,
+                    timestamp: Date.now(),
+                    description: `@${user.username} liked your forum post`,
+                    post: feed._id,
+                    type: "forum-post-like"
+                })
+            }
         }
         updatedFeed = await ForumFeedModel.findById(feedId)
             .populate({

@@ -9,18 +9,20 @@ const ForumFeedModel = require('../models/ForumFeedModel');
 const createComment = async (req, res) => {
     try {
         const fromUser = await UserModel.findById(req.user);
-        const feed = await ForumFeedModel.findById(req.params._id) 
+        const feed = await ForumFeedModel.findById(req.params._id)
         const newComment = new ForumFeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
-        await NotificationModel.create({
-            from: fromUser._id,
-            to: feed.userId,
-            title: `@${fromUser.username} added a comment on your post`,
-            timestamp: Date.now(),
-            description: `@${fromUser.username} added a comment on your post`,
-            post: req.params._id,
-            type: "feed-comment"
-        })
+        if (feed.userId != req.user) {
+            await NotificationModel.create({
+                from: fromUser._id,
+                to: feed.userId,
+                title: `@${fromUser.username} added a comment on your post`,
+                timestamp: Date.now(),
+                description: `@${fromUser.username} added a comment on your post`,
+                post: req.params._id,
+                type: "feed-comment"
+            })
+        }
         return sendResponse(200, true, "Comment posted successfully", { ...savedComment.toObject(), liked: false, likesCount: 0 }, res);
     }
     catch (error) {

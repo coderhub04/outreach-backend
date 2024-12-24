@@ -384,15 +384,17 @@ const addLikeOnFeedController = async (req, res) => {
             await FeedsModel.findByIdAndUpdate(feedId, { $pull: { likes: user._id } });
         } else {
             await FeedsModel.findByIdAndUpdate(feedId, { $push: { likes: user._id } });
-            await NotificationModel.create({
-                from: user._id,
-                to: feed.userId,
-                title: `@${user.username} liked your post`,
-                timestamp: Date.now(),
-                description: `@${user.username} liked your post`,
-                post: feed._id,
-                type: "feed-like"
-            })
+            if (feed.userId !== user._id) {
+                await NotificationModel.create({
+                    from: user._id,
+                    to: feed.userId,
+                    title: `@${user.username} liked your post`,
+                    timestamp: Date.now(),
+                    description: `@${user.username} liked your post`,
+                    post: feed._id,
+                    type: "feed-like"
+                })
+            }
         }
         updatedFeed = await FeedsModel.findById(feedId)
             .populate({

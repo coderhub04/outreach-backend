@@ -20,7 +20,7 @@ const createComment = async (req, res) => {
 
         const newComment = new FeedCommentModel({ postID: req.params._id, author: req.user, ...req.body, createdAt: Date.now() });
         const savedComment = await newComment.save();
-        if (feed) {
+        if (feed && feed.userId !== req.user) {
             const notification = new NotificationModel({
                 from: fromUser._id,
                 to: feed.userId,

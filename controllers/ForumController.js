@@ -80,6 +80,66 @@ const createForumPost = async (req, res) => {
         return sendResponse(500, false, error.message, null, res);
     }
 }
+const updateForumPost = async (req, res) => {
+    try {
+        const { user_id } = sanitizeData(req.userToken);
+        const { feedId } = sanitizeData(req.params);
+        const updateData = sanitizeData(req.body.updateData);
+
+        if (!feedId) {
+            return sendResponse(400, false, "Feed ID Missing", null, res);
+        }
+
+        const user = await UserModel.findOne({ firebaseAuthId: user_id });
+        if (!user) {
+            return sendResponse(400, false, "Invalid User Id", null, res);
+        }
+
+        const feed = await ForumFeedModel.findById(feedId);
+        if (!feed) {
+            return sendResponse(404, false, "Feed Does Not Exist", null, res);
+        }
+
+        if (feed.userId.toString() !== user._id.toString()) {
+            return sendResponse(403, false, "Access Denied", null, res);
+        }
+
+        if (user.block) {
+            return sendResponse(403, false, "Cannot Update Post", null, res);
+        }
+        const alreadyLiked = feed.likes.includes(user._id);
+        let updatedFeed;
+        updatedFeed = await ForumFeedModel.findByIdAndUpdate(feedId, updateData, { new: true });
+        if (!updatedFeed) {
+            return sendResponse(500, false, "Failed to Update Feed", null, res);
+        }
+        updatedFeed = await ForumFeedModel.findById(feedId)
+            .populate({
+                path: "userId",
+                select: "name username imageUrl",
+                model: "users",
+                options: {
+                    virtuals: true,
+                    justOne: true,
+                    virtualName: 'user'
+                }
+            })
+            .lean();
+
+        updatedFeed.user = updatedFeed.userId;
+        delete updatedFeed.userId;
+        const commentsCount = await ForumFeedModel.find({ postID: feedId }).countDocuments();
+        updatedFeed.likesCount = updatedFeed.likes.length;
+        updatedFeed.commentCount = commentsCount;
+        updatedFeed.liked = !alreadyLiked;
+
+        return sendResponse(200, true, "Feed Updated Successfully", updatedFeed, res);
+    }
+    catch (error) {
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+
+}
 const deleteForumPost = async (req, res) => {
     try {
         const deletedPost = await ForumFeedModel.findByIdAndUpdate(req.params._id, {
@@ -282,6 +342,7 @@ module.exports = {
     joinForum,
     leaveForum,
     createForumPost,
+    updateForumPost,
     getForumPost,
     addLikeOnForumFeedController
 }

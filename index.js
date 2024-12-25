@@ -28,6 +28,14 @@ const postRoutesAdmin = require("./routes/admin/FeedRoutes");
 const forumPostsRoutesAdmin = require("./routes/admin/ForumFeedRoutes");
 
 const mongoose = require("mongoose");
+const sendResponse = require("./utils/response");
+const UserModel = require("./models/UserModel");
+const FeedsModel = require("./models/FeedsModel");
+const ResourceFeedsModel = require("./models/ResourceFeed");
+const ForumModel = require("./models/ForumModel");
+const ForumFeedModel = require("./models/ForumFeedModel");
+const ReportModel = require("./models/ReportModel");
+const verifyAdmin = require("./middlewares/verifyAdmin");
 
 const app = express();
 app.use(cors({ origin: ["*", 'http://localhost:5173', "https://outreach-web.vercel.app"] }));
@@ -35,7 +43,83 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '500mb', extended: true, parameterLimit: 100000 }));
 
+app.get("/", verifyAdmin, (req, res) => {
+    res.status(200).json({
+        error: false,
+        message: "Outreach Server Status: Online"
+    })
+})
+app.get("/dashboard/admin", async (req, res) => {
+    try {
 
+        // USERS
+        const totalUsers = await UserModel.countDocuments()
+        const activeUsers = await UserModel.countDocuments({ block: false })
+        const inactiveUsers = await UserModel.countDocuments({ block: true })
+
+        // POSTS
+        const totalPosts = await FeedsModel.countDocuments()
+        const disabledPosts = await FeedsModel.countDocuments({ block: true })
+        const activePosts = await FeedsModel.countDocuments({ block: false })
+
+        // RESOURCES
+        const totalResourcePosts = await ResourceFeedsModel.countDocuments()
+        const disabledResourcePosts = await ResourceFeedsModel.countDocuments({ block: true })
+        const activeResourcePosts = await ResourceFeedsModel.countDocuments({ block: false })
+
+        // FORUM
+        const totalForums = await ForumModel.countDocuments()
+        const disabledForums = await ForumModel.countDocuments({ disabled: true })
+        const activeForums = await ForumModel.countDocuments({ disabled: false })
+
+        // FORUM-POST
+        const totalForumPosts = await ForumFeedModel.countDocuments()
+        const disabledForumPosts = await ForumFeedModel.countDocuments({ block: true })
+        const activeForumPosts = await ForumFeedModel.countDocuments({ block: false })
+
+        // REPORTS
+        const totalReports = await ReportModel.countDocuments()
+        const postReports = await ReportModel.countDocuments({ type: "post" })
+        const resourceReports = await ReportModel.countDocuments({ type: "resource" })
+        const forumPostReports = await ReportModel.countDocuments({ type: "forum" })
+
+        return sendResponse(200, true, "Dashboard Details fetched successfully", {
+            reports: {
+                total: totalReports,
+                post: postReports,
+                resource: resourceReports,
+                forum: forumPostReports
+            },
+            user: {
+                total: totalUsers,
+                active: activeUsers,
+                disabled: inactiveUsers
+            },
+            post: {
+                total: totalPosts,
+                active: activePosts,
+                disabled: disabledPosts
+            },
+            forum: {
+                total: totalForums,
+                active: activeForums,
+                disabled: disabledForums
+            },
+            forumpost: {
+                total: totalForumPosts,
+                active: activeForumPosts,
+                disabled: disabledForumPosts
+            },
+            resource: {
+                total: totalResourcePosts,
+                active: activeResourcePosts,
+                disabled: disabledResourcePosts
+            },
+        }, res);
+    } catch (error) {
+        return sendResponse(500, false, "Internal Server Error", null, res);
+    }
+})
 app.use("/user", userRoutes);
 app.use("/support", helpAndSupportRoutes);
 app.use("/feed", feedsRoutes);

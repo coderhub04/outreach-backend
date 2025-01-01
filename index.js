@@ -43,7 +43,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '500mb', extended: true, parameterLimit: 100000 }));
 
-app.get("/", verifyAdmin, (req, res) => {
+app.get("/", (req, res) => {
     res.status(200).json({
         error: false,
         message: "Outreach Server Status: Online"
@@ -83,6 +83,85 @@ app.get("/dashboard/admin", async (req, res) => {
         const resourceReports = await ReportModel.countDocuments({ type: "resource" })
         const forumPostReports = await ReportModel.countDocuments({ type: "forum" })
 
+        // GRAPH-USERS - Last 6 Months
+
+        const usersReport = await UserModel.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+                    }
+                }
+            },
+            {
+                $project: {
+                    createdAt: {
+                        $toDate: "$createdAt"
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    month: {
+                        $let: {
+                            vars: {
+                                months: [
+                                    "January", "February", "March", "April",
+                                    "May", "June", "July", "August",
+                                    "September", "October", "November", "December"
+                                ]
+                            },
+                            in: {
+                                $arrayElemAt: ["$$months", { $subtract: ["$_id.month", 1] }]
+                            }
+                        }
+                    },
+                    count: 1,
+                    sortOrder: {
+                        $concat: [
+                            { $toString: "$_id.year" },
+                            {
+                                $cond: {
+                                    if: { $lt: ["$_id.month", 10] },
+                                    then: { $concat: ["0", { $toString: "$_id.month" }] },
+                                    else: { $toString: "$_id.month" }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $sort: { sortOrder: 1 }
+            },
+            {
+                $group: {
+                    _id: null,
+                    data: {
+                        $push: {
+                            k: { $toString: "$month" },
+                            v: "$count"
+                        }
+                    }
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: { $arrayToObject: "$data" }
+                }
+            }
+        ])
+
         return sendResponse(200, true, "Dashboard Details fetched successfully", {
             reports: {
                 total: totalReports,
@@ -115,6 +194,10 @@ app.get("/dashboard/admin", async (req, res) => {
                 active: activeResourcePosts,
                 disabled: disabledResourcePosts
             },
+            graph: {
+                users: Object.entries(usersReport[0]),
+                posts: []
+            }
         }, res);
     } catch (error) {
         return sendResponse(500, false, "Internal Server Error", null, res);

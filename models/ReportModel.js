@@ -27,7 +27,7 @@ const ReportSchema = new mongoose.Schema({
 		required: true,
 		enum: ["resource", "post", "forum"]
 	}
-});
+}, {timestamps: true});
 
 const ReportModel = mongoose.model("reports", ReportSchema);
 

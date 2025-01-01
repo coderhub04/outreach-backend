@@ -19,7 +19,7 @@ const HelpAndSupportSchema = new mongoose.Schema({
         ref: "users",
         required: true,
     },
-});
+}, {timestamps: true});
 
 const HelpAndSupportModel = mongoose.model("helps_and_supports", HelpAndSupportSchema);
 

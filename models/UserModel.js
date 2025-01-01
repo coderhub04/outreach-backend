@@ -55,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     fcmToken: {
         type: String,
     }
-});
+}, {timestamps: true});
 
 const UserModel = mongoose.model("users", UserSchema);
 

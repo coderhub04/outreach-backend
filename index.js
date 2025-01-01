@@ -78,7 +78,7 @@ app.get("/dashboard/admin", async (req, res) => {
         const activeForumPosts = await ForumFeedModel.countDocuments({ block: false })
 
         // REPORTS
-        const totalReports = await ReportModel.countDocuments()
+        // const totalReports = await ReportModel.countDocuments()
         const postReports = await ReportModel.countDocuments({ type: "post" })
         const resourceReports = await ReportModel.countDocuments({ type: "resource" })
         const forumPostReports = await ReportModel.countDocuments({ type: "forum" })
@@ -164,7 +164,6 @@ app.get("/dashboard/admin", async (req, res) => {
 
         return sendResponse(200, true, "Dashboard Details fetched successfully", {
             reports: {
-                total: totalReports,
                 post: postReports,
                 resource: resourceReports,
                 forum: forumPostReports

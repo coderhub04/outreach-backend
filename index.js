@@ -161,6 +161,82 @@ app.get("/dashboard/admin", async (req, res) => {
                 }
             }
         ])
+        const postsReport = await FeedsModel.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+                    }
+                }
+            },
+            {
+                $project: {
+                    createdAt: {
+                        $toDate: "$createdAt"
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    month: {
+                        $let: {
+                            vars: {
+                                months: [
+                                    "January", "February", "March", "April",
+                                    "May", "June", "July", "August",
+                                    "September", "October", "November", "December"
+                                ]
+                            },
+                            in: {
+                                $arrayElemAt: ["$$months", { $subtract: ["$_id.month", 1] }]
+                            }
+                        }
+                    },
+                    count: 1,
+                    sortOrder: {
+                        $concat: [
+                            { $toString: "$_id.year" },
+                            {
+                                $cond: {
+                                    if: { $lt: ["$_id.month", 10] },
+                                    then: { $concat: ["0", { $toString: "$_id.month" }] },
+                                    else: { $toString: "$_id.month" }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $sort: { sortOrder: 1 }
+            },
+            {
+                $group: {
+                    _id: null,
+                    data: {
+                        $push: {
+                            k: { $toString: "$month" },
+                            v: "$count"
+                        }
+                    }
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: { $arrayToObject: "$data" }
+                }
+            }
+        ])
 
         return sendResponse(200, true, "Dashboard Details fetched successfully", {
             reports: {
@@ -195,7 +271,7 @@ app.get("/dashboard/admin", async (req, res) => {
             },
             graph: {
                 users: Object.entries(usersReport[0]),
-                posts: []
+                posts: Object.entries(postsReport[0])
             }
         }, res);
     } catch (error) {

@@ -49,7 +49,7 @@ app.get("/", (req, res) => {
         message: "Outreach Server Status: Online"
     })
 })
-app.get("/dashboard/admin", async (req, res) => {
+app.get("/dashboard/admin", verifyAdmin, async (req, res) => {
     try {
 
         // USERS

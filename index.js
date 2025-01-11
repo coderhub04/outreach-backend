@@ -38,7 +38,7 @@ const ReportModel = require("./models/ReportModel");
 const verifyAdmin = require("./middlewares/verifyAdmin");
 
 const app = express();
-app.use(cors({ origin: ["*", 'http://localhost:5173', "https://outreach-web.vercel.app"] }));
+app.use(cors({ origin: ["*", 'http://localhost:5173', "https://outreach-web.vercel.app", "https://outreach-dashboard.vercel.app"] }));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '500mb', extended: true, parameterLimit: 100000 }));

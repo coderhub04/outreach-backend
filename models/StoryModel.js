@@ -22,7 +22,12 @@ const StorySchema = new mongoose.Schema({
     deleted: {
         type: Boolean,
         default: false
-    }
+    },
+    public: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 }, {
     timestamps: true
 });

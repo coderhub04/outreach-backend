@@ -27,6 +27,9 @@ const resourceRoutesAdmin = require("./routes/admin/ResourceRoutes");
 const postRoutesAdmin = require("./routes/admin/FeedRoutes");
 const forumPostsRoutesAdmin = require("./routes/admin/ForumFeedRoutes");
 
+//ZEGO
+const zegoRoutes = require("./routes/zego/Route");
+
 const mongoose = require("mongoose");
 const sendResponse = require("./utils/response");
 const UserModel = require("./models/UserModel");
@@ -300,6 +303,8 @@ app.use("/admin/resource", resourceRoutesAdmin)
 app.use("/admin/post", postRoutesAdmin)
 app.use("/admin/forum-post", forumPostsRoutesAdmin)
 
+
+app.use("/zego", zegoRoutes)
 mongoose.connect(process.env.MONGO_URL)
     .then(() => { console.log("Database is Connected") })
     .catch((err) => { console.log("Database is not Connected ", err) })

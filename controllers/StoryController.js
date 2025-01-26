@@ -87,7 +87,10 @@ const getStories = async (req, res) => {
 		let stories = [];
 		if (connectedUsers && connectedUsers[0] && connectedUsers[0].userIds) {
 			stories = await StoryModel.find({
-				userId: { $in: connectedUsers[0].userIds },
+				$or: [
+					{userId: { $in: connectedUsers[0].userIds },},
+					{public: false},
+				],
 				deleted: false
 			})
 				.sort({ timestamp: -1 }).populate({

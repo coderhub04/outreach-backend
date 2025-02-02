@@ -148,12 +148,14 @@ const getUserProfileController = async (req, res) => {
             userId: userID,
             follower: user._id
         })
+        const feedCount = await FeedsModel.find({userId: userID, deleted: false, block: false})
         const userResponse = {
             ...user.toObject(),
             feeds,
             followers: followerCount,
             following: followingCount,
-            isFollowing: isFollowing ? true : false
+            isFollowing: isFollowing ? true : false,
+            feedCount: feedCount
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);
@@ -242,11 +244,13 @@ const getCurrentProfileController = async (req, res) => {
         const followingCount = await FollowingModel.countDocuments({
             userId: user._id
         })
+        const feedCount = await FeedsModel.find({userId: userID, deleted: false, block: false})
         const userResponse = {
             ...user.toObject(),
             feeds,
             followers: followerCount,
             following: followingCount,
+            feedCount: feedCount
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);

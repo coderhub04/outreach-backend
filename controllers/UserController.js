@@ -148,7 +148,7 @@ const getUserProfileController = async (req, res) => {
             userId: userID,
             follower: user._id
         })
-        const feedCount = await FeedsModel.countDocuments({userId: userID, deleted: false, block: false})
+        const feedCount = await FeedsModel.countDocuments({userId: user._id, deleted: false, block: false})
         const userResponse = {
             ...user.toObject(),
             feeds,

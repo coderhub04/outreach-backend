@@ -262,12 +262,30 @@ const getCurrentProfileController = async (req, res) => {
             userId: user._id
         })
         const feedCount = await FeedsModel.countDocuments({ userId: user._id, deleted: false, block: false })
+        const topUsers = await UserModel.aggregate([
+            {
+                $sort: { rewardPoints: -1 } // Sort by rewardPoints in descending order
+            },
+            {
+                $limit: 5 // Limit to top 5 users
+            },
+            {
+                $project: {
+                    imageUrl: 1,
+                    name: 1,
+                    username: 1,
+                    rewardPoints: 1,
+                    _id: 0 // Exclude _id from the result
+                }
+            }
+        ]);
         const userResponse = {
             ...user.toObject(),
             feeds,
             followers: followerCount,
             following: followingCount,
-            feedCount: feedCount
+            feedCount: feedCount,
+            topUsers
         };
 
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);

@@ -148,16 +148,33 @@ const getUserProfileController = async (req, res) => {
             userId: userID,
             follower: user._id
         })
-        const feedCount = await FeedsModel.countDocuments({userId: user._id, deleted: false, block: false})
+        const feedCount = await FeedsModel.countDocuments({ userId: user._id, deleted: false, block: false })
+        const topUsers = await UserModel.aggregate([
+            {
+                $sort: { rewardPoints: -1 } // Sort by rewardPoints in descending order
+            },
+            {
+                $limit: 5 // Limit to top 5 users
+            },
+            {
+                $project: {
+                    imageUrl: 1,
+                    name: 1,
+                    username: 1,
+                    rewardPoints: 1,
+                    _id: 0 // Exclude _id from the result
+                }
+            }
+        ]);
         const userResponse = {
             ...user.toObject(),
             feeds,
             followers: followerCount,
             following: followingCount,
             isFollowing: isFollowing ? true : false,
-            feedCount: feedCount
+            feedCount: feedCount,
+            topUsers: topUsers,
         };
-
         return sendResponse(200, true, "Data Fetched Successfully", userResponse, res);
     }
     catch (error) {
@@ -244,7 +261,7 @@ const getCurrentProfileController = async (req, res) => {
         const followingCount = await FollowingModel.countDocuments({
             userId: user._id
         })
-        const feedCount = await FeedsModel.countDocuments({userId: user._id, deleted: false, block: false})
+        const feedCount = await FeedsModel.countDocuments({ userId: user._id, deleted: false, block: false })
         const userResponse = {
             ...user.toObject(),
             feeds,

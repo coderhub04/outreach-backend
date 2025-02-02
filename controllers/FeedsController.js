@@ -27,6 +27,9 @@ const createFeedController = async (req, res) => {
 
         const newFeed = new FeedsModel(feedData);
         await newFeed.save();
+        await UserModel.findByIdAndUpdate(user._id, {
+            $inc: { rewardPoints: 5 }
+        })
         return sendResponse(201, true, "Feed Uploaded Successfully", newFeed, res);
     }
     catch (error) {

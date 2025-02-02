@@ -28,6 +28,9 @@ const createStory = async (req, res) => {
 
 		const createStory = new StoryModel(storyData);
 		const savedStory = await createStory.save();
+		await UserModel.findByIdAndUpdate(user._id, {
+            $inc: { rewardPoints: 2 }
+        })
 		return sendResponse(201, true, "Story Uploaded Successfully", savedStory, res);
 	}
 	catch (error) {

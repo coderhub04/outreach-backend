@@ -69,7 +69,6 @@ const reportedPosts = async (req, res) => {
     }
 };
 
-
 const getPostById = async (req, res) => {
 	try {
 		const post = await FeedsModel.findOne({ _id: req.params._id }).populate({

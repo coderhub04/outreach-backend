@@ -12,6 +12,9 @@ const createForum = async (req, res) => {
         const newForum = new ForumModel({ ...req.body, userId: req.user });
         newForum.joined.push(req.user)
         const savedForum = await newForum.save()
+        await UserModel.findByIdAndUpdate(req.user, {
+            $inc: { rewardPoints: 5 }
+        })
         return sendResponse(200, true, 'Forum created', savedForum, res);
     } catch (error) {
         console.log(error)

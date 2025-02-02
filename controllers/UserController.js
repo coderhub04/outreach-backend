@@ -244,7 +244,7 @@ const getCurrentProfileController = async (req, res) => {
         const followingCount = await FollowingModel.countDocuments({
             userId: user._id
         })
-        const feedCount = await FeedsModel.feedCount({userId: user._id, deleted: false, block: false})
+        const feedCount = await FeedsModel.countDocuments({userId: user._id, deleted: false, block: false})
         const userResponse = {
             ...user.toObject(),
             feeds,

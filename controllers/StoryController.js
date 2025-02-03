@@ -44,7 +44,7 @@ const getStories = async (req, res) => {
 		const data = sanitizeData(req.body);
 		const { user_id } = sanitizeData(req.userToken);
 
-		if (!true) {
+		if (!user_id) {
 			return sendResponse(400, false, "User ID Missing", null, res);
 		}
 
@@ -86,45 +86,66 @@ const getStories = async (req, res) => {
 					userIds: 1
 				}
 			}
-		])
+		]);
+
 		let stories = [];
-		if (connectedUsers && connectedUsers[0] && connectedUsers[0].userIds) {
+		if (connectedUsers.length > 0 && connectedUsers[0].userIds.length > 0) {
 			stories = await StoryModel.find({
 				$or: [
-					{userId: { $in: connectedUsers[0].userIds },},
-					{public: false},
+					{ userId: { $in: connectedUsers[0].userIds } },
+					{ public: false }
 				],
 				deleted: false
 			})
-				.sort({ timestamp: -1 }).populate({
-					path: "userId",
-					select: "name username imageUrl",
-					model: "users",
-					options: {
-						virtuals: true,
-						justOne: true,
-						virtualName: 'user'
-					}
-				});
-		}
-		const ownStory = await StoryModel.find({
-			userId: user._id,
-			deleted: false
-		})
-			.sort({ timestamp: -1 }).populate({
+			.sort({ timestamp: -1 })
+			.populate({
 				path: "userId",
 				select: "name username imageUrl",
 				model: "users",
 				options: {
 					virtuals: true,
 					justOne: true,
-					virtualName: 'user'
+					virtualName: "user"
 				}
 			});
-		return sendResponse(200, true, "Story Fetched Successfully", { own: ownStory, user: stories, }, res);
-	}
-	catch (error) {
-		console.error("Error while posting story", error);
+		} else {
+			// If no connected users, fetch only public stories
+			stories = await StoryModel.find({
+				public: false,
+				deleted: false
+			})
+			.sort({ timestamp: -1 })
+			.populate({
+				path: "userId",
+				select: "name username imageUrl",
+				model: "users",
+				options: {
+					virtuals: true,
+					justOne: true,
+					virtualName: "user"
+				}
+			});
+		}
+
+		const ownStory = await StoryModel.find({
+			userId: user._id,
+			deleted: false
+		})
+		.sort({ timestamp: -1 })
+		.populate({
+			path: "userId",
+			select: "name username imageUrl",
+			model: "users",
+			options: {
+				virtuals: true,
+				justOne: true,
+				virtualName: "user"
+			}
+		});
+
+		return sendResponse(200, true, "Story Fetched Successfully", { own: ownStory, user: stories }, res);
+	} catch (error) {
+		console.error("Error while fetching story", error);
 		return sendResponse(500, false, "Error while fetching story", error.message, res);
 	}
 };
